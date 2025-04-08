@@ -113,27 +113,6 @@ fn link(_: Request, cx: RouteContext<Config>) -> Result<Response> {
 }
 
 /// Generates the vmess link
-fn link(_: Request, cx: RouteContext<Config>) -> Result<Response> {
-    // Extract host and uuid from the context
-    let host = cx.data.host.to_string();
-    let uuid = cx.data.uuid.to_string();
-
-    // Generate all the required links using helper functions
-    let vmess_link = generate_vmess_link(&host, &uuid);
-    let vless_link = generate_vless_link(&host, &uuid);
-    let trojan_link = generate_trojan_link(&host, &uuid);
-    let ss_link = generate_ss_link(&host, &uuid);
-
-    // Return the response with the generated links array (without the "links" field)
-    Response::from_json(&[
-        vmess_link, 
-        vless_link, 
-        trojan_link, 
-        ss_link
-    ])
-}
-
-/// Generates the vmess link
 fn generate_vmess_link(host: &str, uuid: &str) -> String {
     let config = json!({
         "ps": "siren vmess",
@@ -157,22 +136,21 @@ fn generate_vmess_link(host: &str, uuid: &str) -> String {
 /// Generates the vless link
 fn generate_vless_link(host: &str, uuid: &str) -> String {
     format!(
-        "vless://{uuid}@{host}:443?encryption=none&type=ws&host={host}&path=%2FSG&security=tls&sni={host}#INCONIGTO VL"
+        "vless://{uuid}@{host}:443?encryption=none&type=ws&host={host}&path=%2FKR&security=tls&sni={host}#siren vless"
     )
 }
 
 /// Generates the trojan link
 fn generate_trojan_link(host: &str, uuid: &str) -> String {
     format!(
-        "trojan://{uuid}@{host}:443?encryption=none&type=ws&host={host}&path=%2FSG&security=tls&sni={host}#INCONIGTO TR"
+        "trojan://{uuid}@{host}:443?encryption=none&type=ws&host={host}&path=%2FKR&security=tls&sni={host}#siren trojan"
     )
 }
 
 /// Generates the ss link
 fn generate_ss_link(host: &str, uuid: &str) -> String {
     format!(
-        "ss://{}@{host}:443?plugin=v2ray-plugin%3Btls%3Bmux%3D0%3Bmode%3Dwebsocket%3Bpath%3D%2FSG%3Bhost%3D{host}#INCONIGTO SS",
+        "ss://{}@{host}:443?plugin=v2ray-plugin%3Btls%3Bmux%3D0%3Bmode%3Dwebsocket%3Bpath%3D%2FKR%3Bhost%3D{host}#siren ss",
         URL_SAFE.encode(format!("none:{uuid}"))
     )
 }
-
