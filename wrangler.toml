@@ -11,5 +11,14 @@ build = { command = "cargo install -q worker-build && worker-build --dev" }
 
 [vars]
 UUID = "00000000-0000-0000-0000-000000000000"
-MAIN_PAGE_URL = "https://raw.githubusercontent.com/FoolVPN-ID/Siren/refs/heads/master/web/index.html"
-SUB_PAGE_URL = "https://raw.githubusercontent.com/FoolVPN-ID/Siren/refs/heads/master/web/sub.html"
+MAIN_PAGE_URL = "https://raw.githubusercontent.com/InconigtoMode/inconigto-vpn/refs/heads/master/web/index.html"
+SUB_PAGE_URL = "https://raw.githubusercontent.com/InconigtoMode/inconigto-vpn/refs/heads/master/web/sub.html"
+routes = [
+  { pattern = "inconigto-mode.web.id", custom_domain = true },
+  { pattern = "ava.game.naver.com.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "df.game.naver.com.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "graph.instagram.com.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "zaintest.vuclip.com.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "support.zoom.us.inconigto-mode.web.id", custom_domain = true },  
+  { pattern = "cache.netflix.com.inconigto-mode.web.id", custom_domain = true },
+]
