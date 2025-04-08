@@ -1,82 +1,724 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MyWebsite</title>
-    <!-- Tailwind + DaisyUI CDN -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Account Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.24/dist/full.min.css" rel="stylesheet" type="text/css" />
-  </head>
-  <body class="bg-base-100 text-base-content">
-    <!-- Navbar -->
-    <div class="navbar bg-base-200 px-6 fixed">
-      <div class="flex-1">
-        <a class="btn btn-ghost text-xl">MyWebsite</a>
-      </div>
-      <div class="flex-none">
-        <ul class="menu menu-horizontal px-1">
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">INCONIGTO-VPN</h1>
+                
+                <!-- Proxy List Section -->
+                <div id="proxy-list-section">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Proxy List</h2>
+                        <div class="flex space-x-2">
+                            <button id="refresh-btn" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                <i class="fas fa-sync-alt mr-2"></i>Refresh List
+                            </button>
+                            <button id="custom-url-btn" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                <i class="fas fa-link mr-2"></i>Custom URL
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="custom-url-input" class="mb-4 hidden">
+                        <div class="flex">
+                            <input type="text" id="proxy-url" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                placeholder="Enter custom proxy list URL" 
+                                value="https://raw.githubusercontent.com/InconigtoMode/proxylist/refs/heads/main/all.txt">
+                            <button id="load-custom-url" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600">
+                                Load
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="loading-indicator" class="text-center py-8 hidden">
+                        <i class="fas fa-spinner fa-spin text-blue-500 text-4xl"></i>
+                        <p class="mt-2 text-gray-600">Loading proxy list...</p>
+                    </div>
+                    
+                    <div id="proxy-table-container" class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Port</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
+                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="proxy-table-body">
+                                <!-- Proxy list will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="no-proxies-message" class="text-center py-8 hidden">
+                        <i class="fas fa-exclamation-circle text-yellow-500 text-4xl"></i>
+                        <p class="mt-2 text-gray-600">No proxies found. Please refresh or try a different URL.</p>
+                    </div>
+                </div>
+                
+                <!-- Account Creation Section -->
+                <div id="account-creation-section" class="mt-8 hidden">
+                    <div class="border-t pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">Create Account</h2>
+                            <button id="back-to-list" class="text-blue-500 hover:text-blue-700">
+                                <i class="fas fa-arrow-left mr-1"></i> Back to List
+                            </button>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-md mb-6">
+                            <h3 class="text-md font-medium text-gray-700 mb-2">Selected Proxy</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div>
+                                    <span class="text-sm text-gray-500">IP:</span>
+                                    <span id="selected-ip" class="text-sm font-medium ml-1">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Port:</span>
+                                    <span id="selected-port" class="text-sm font-medium ml-1">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Country:</span>
+                                    <span id="selected-country" class="text-sm font-medium ml-1">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Provider:</span>
+                                    <span id="selected-provider" class="text-sm font-medium ml-1">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tabs -->
+                        <div class="flex border-b mb-6">
+                            <button class="protocol-tab py-2 px-4 font-medium text-sm focus:outline-none border-b-2 border-blue-500 text-blue-500" data-target="vmess-form">
+                                <i class="fas fa-shield-alt mr-2"></i>VMess
+                            </button>
+                            <button class="protocol-tab py-2 px-4 font-medium text-sm focus:outline-none border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-target="vless-form">
+                                <i class="fas fa-bolt mr-2"></i>VLESS
+                            </button>
+                            <button class="protocol-tab py-2 px-4 font-medium text-sm focus:outline-none border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-target="trojan-form">
+                                <i class="fas fa-user-secret mr-2"></i>Trojan
+                            </button>
+                            <button class="protocol-tab py-2 px-4 font-medium text-sm focus:outline-none border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-target="ss-form">
+                                <i class="fas fa-mask mr-2"></i>Shadowsocks
+                            </button>
+                        </div>
+                        
+                        <!-- VMess Form -->
+                        <div id="vmess-form" class="protocol-form">
+                            <form id="vmess-account-form" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="vmess-name" class="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
+                                        <input type="text" id="vmess-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="vmess-uuid" class="block text-sm font-medium text-gray-700 mb-1">UUID</label>
+                                        <div class="flex">
+                                            <input type="text" id="vmess-uuid" name="uuid" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="00000000-0000-0000-0000-000000000000" required>
+                                            <button type="button" onclick="generateUUID('vmess-uuid')" class="bg-gray-200 px-3 py-2 border border-gray-300 rounded-r-md hover:bg-gray-300">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="vmess-path" class="block text-sm font-medium text-gray-700 mb-1">Path</label>
+                                        <input type="text" id="vmess-path" name="path" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="vmess-network" class="block text-sm font-medium text-gray-700 mb-1">Network</label>
+                                        <select id="vmess-network" name="network" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="ws">WebSocket</option>
+                                            <option value="tcp">TCP</option>
+                                            <option value="grpc">gRPC</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="vmess-security" class="block text-sm font-medium text-gray-700 mb-1">TLS</label>
+                                        <select id="vmess-security" name="security" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="tls">TLS</option>
+                                            <option value="none">None</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="vmess-encryption" class="block text-sm font-medium text-gray-700 mb-1">Encryption</label>
+                                        <select id="vmess-encryption" name="encryption" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="auto">Auto</option>
+                                            <option value="zero">Zero</option>
+                                            <option value="aes-128-gcm">AES-128-GCM</option>
+                                            <option value="chacha20-poly1305">ChaCha20-Poly1305</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-4">
+                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Create VMess Account
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- VLESS Form -->
+                        <div id="vless-form" class="protocol-form hidden">
+                            <form id="vless-account-form" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="vless-name" class="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
+                                        <input type="text" id="vless-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="vless-uuid" class="block text-sm font-medium text-gray-700 mb-1">UUID</label>
+                                        <div class="flex">
+                                            <input type="text" id="vless-uuid" name="uuid" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="00000000-0000-0000-0000-000000000000" required>
+                                            <button type="button" onclick="generateUUID('vless-uuid')" class="bg-gray-200 px-3 py-2 border border-gray-300 rounded-r-md hover:bg-gray-300">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="vless-path" class="block text-sm font-medium text-gray-700 mb-1">Path</label>
+                                        <input type="text" id="vless-path" name="path" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="vless-network" class="block text-sm font-medium text-gray-700 mb-1">Network</label>
+                                        <select id="vless-network" name="network" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="ws">WebSocket</option>
+                                            <option value="tcp">TCP</option>
+                                            <option value="grpc">gRPC</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="vless-security" class="block text-sm font-medium text-gray-700 mb-1">TLS</label>
+                                        <select id="vless-security" name="security" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="tls">TLS</option>
+                                            <option value="none">None</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="vless-encryption" class="block text-sm font-medium text-gray-700 mb-1">Encryption</label>
+                                        <select id="vless-encryption" name="encryption" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="none">None</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-4">
+                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Create VLESS Account
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Trojan Form -->
+                        <div id="trojan-form" class="protocol-form hidden">
+                            <form id="trojan-account-form" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="trojan-name" class="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
+                                        <input type="text" id="trojan-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="trojan-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                        <div class="flex">
+                                            <input type="text" id="trojan-password" name="password" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Strong password" required>
+                                            <button type="button" onclick="generatePassword('trojan-password')" class="bg-gray-200 px-3 py-2 border border-gray-300 rounded-r-md hover:bg-gray-300">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="trojan-path" class="block text-sm font-medium text-gray-700 mb-1">Path</label>
+                                        <input type="text" id="trojan-path" name="path" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="trojan-network" class="block text-sm font-medium text-gray-700 mb-1">Network</label>
+                                        <select id="trojan-network" name="network" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="ws">WebSocket</option>
+                                            <option value="tcp">TCP</option>
+                                            <option value="grpc">gRPC</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="trojan-security" class="block text-sm font-medium text-gray-700 mb-1">TLS</label>
+                                        <select id="trojan-security" name="security" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="tls">TLS</option>
+                                            <option value="none">None</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="trojan-sni" class="block text-sm font-medium text-gray-700 mb-1">SNI (Server Name)</label>
+                                        <input type="text" id="trojan-sni" name="sni" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="mode.t-me-inconigto.workers.dev" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-4">
+                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Create Trojan Account
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Shadowsocks Form -->
+                        <div id="ss-form" class="protocol-form hidden">
+                            <form id="ss-account-form" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="ss-name" class="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
+                                        <input type="text" id="ss-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="ss-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                        <div class="flex">
+                                            <input type="text" id="ss-password" name="password" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Strong password" required>
+                                            <button type="button" onclick="generatePassword('ss-password')" class="bg-gray-200 px-3 py-2 border border-gray-300 rounded-r-md hover:bg-gray-300">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="ss-method" class="block text-sm font-medium text-gray-700 mb-1">Encryption Method</label>
+                                        <select id="ss-method" name="method" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="aes-256-gcm">aes-256-gcm</option>
+                                            <option value="aes-128-gcm">aes-128-gcm</option>
+                                            <option value="chacha20-poly1305">chacha20-poly1305</option>
+                                            <option value="2022-blake3-aes-256-gcm">2022-blake3-aes-256-gcm</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="ss-plugin" class="block text-sm font-medium text-gray-700 mb-1">Plugin</label>
+                                        <select id="ss-plugin" name="plugin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="none">None</option>
+                                            <option value="v2ray-plugin">v2ray-plugin</option>
+                                            <option value="obfs-local">Simple-Obfs</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div id="ss-plugin-options" class="hidden">
+                                    <label for="ss-plugin-opts" class="block text-sm font-medium text-gray-700 mb-1">Plugin Options</label>
+                                    <input type="text" id="ss-plugin-opts" name="plugin-opts" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="tls;host=mode.t-me-inconigto.workers.dev;path=/path">
+                                </div>
+                                
+                                <div class="pt-4">
+                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Create Shadowsocks Account
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Result Section -->
+                <div id="result-section" class="mt-8 hidden">
+                    <div class="border-t pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">Account Created Successfully</h2>
+                            <button id="back-to-form" class="text-blue-500 hover:text-blue-700">
+                                <i class="fas fa-arrow-left mr-1"></i> Back to Form
+                            </button>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-md mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-md font-medium text-gray-700">Connection URL</h3>
+                                <button id="copy-url" class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
+                                    <i class="far fa-copy mr-1"></i> Copy
+                                </button>
+                            </div>
+                            <div id="connection-url" class="text-sm bg-gray-100 p-3 rounded break-all font-mono"></div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-md font-medium text-gray-700">QR Code</h3>
+                                <button id="download-qr" class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
+                                    <i class="fas fa-download mr-1"></i> Download
+                                </button>
+                            </div>
+                            <div class="flex justify-center py-4">
+                                <div id="qrcode" class="bg-white p-2 rounded"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex space-x-4">
+                            <button id="create-new" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Create Another Account
+                            </button>
+                            <button id="back-to-list-from-result" class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                Back to Proxy List
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Hero Section -->
-    <section id="hero" class="hero min-h-screen bg-base-100">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <h1 class="text-5xl font-bold">Welcome to MyWebsite</h1>
-          <p class="py-6">Build beautiful websites effortlessly using Tailwind and DaisyUI.</p>
-          <a href="#features" class="btn btn-primary">Get Started</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="py-16 bg-base-200">
-      <div class="max-w-6xl mx-auto px-6">
-        <h2 class="text-3xl font-bold text-center mb-10">Features</h2>
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-              <h3 class="card-title">Fast Development</h3>
-              <p>Rapidly build and customize your UI with Tailwind CSS utility classes.</p>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-              <h3 class="card-title">Beautiful UI</h3>
-              <p>DaisyUI components come styled and ready to use — just plug and play.</p>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-              <h3 class="card-title">Fully Responsive</h3>
-              <p>Designed with mobile-first responsiveness in mind for all devices.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer p-10 bg-base-300 text-base-content">
-      <aside>
-        <p>MyWebsite © 2025 - All rights reserved</p>
-      </aside>
-      <nav>
-        <h6 class="footer-title">Social</h6>
-        <div class="grid grid-flow-col gap-4">
-          <a href="#"
-            ><svg xmlns="http://www.w3.org/2000/svg" class="fill-current w-6 h-6" viewBox="0 0 24 24">
-              <path
-                d="M24 4.5a9.9 9.9 0 0 1-2.8.8 5 5 0 0 0 2.2-2.7 9.8 9.8 0 0 1-3.1 1.2 4.9 4.9 0 0 0-8.5 4.5A13.9 13.9 0 0 1 1.6 3.2a4.9 4.9 0 0 0 1.5 6.5A4.8 4.8 0 0 1 .9 9v.1a4.9 4.9 0 0 0 3.9 4.8 5 5 0 0 1-2.2.1 4.9 4.9 0 0 0 4.6 3.4 9.8 9.8 0 0 1-6.1 2.1A10 10 0 0 1 0 20a13.9 13.9 0 0 0 7.5 2.2c9 0 13.9-7.5 13.9-14v-.6A10 10 0 0 0 24 4.5z"
-              /></svg
-          ></a>
-        </div>
-      </nav>
-    </footer>
-  </body>
+    
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    
+    <script>
+        // Global variables
+        let proxyList = [];
+        let selectedProxy = null;
+        const defaultProxyUrl = 'https://raw.githubusercontent.com/InconigtoMode/proxylist/refs/heads/main/all.txt';
+        const serverDomain = 'mode.t-me-inconigto.workers.dev';
+        const defaultUUID = '00000000-0000-0000-0000-000000000000';
+        
+        // DOM elements
+        const proxyListSection = document.getElementById('proxy-list-section');
+        const accountCreationSection = document.getElementById('account-creation-section');
+        const resultSection = document.getElementById('result-section');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const proxyTableBody = document.getElementById('proxy-table-body');
+        const noProxiesMessage = document.getElementById('no-proxies-message');
+        const customUrlInput = document.getElementById('custom-url-input');
+        const proxyUrlInput = document.getElementById('proxy-url');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load proxy list on page load
+            loadProxyList(defaultProxyUrl);
+            
+            // Event listeners
+            document.getElementById('refresh-btn').addEventListener('click', function() {
+                loadProxyList(defaultProxyUrl);
+            });
+            
+            document.getElementById('custom-url-btn').addEventListener('click', function() {
+                customUrlInput.classList.toggle('hidden');
+            });
+            
+            document.getElementById('load-custom-url').addEventListener('click', function() {
+                const url = proxyUrlInput.value.trim();
+                if (url) {
+                    loadProxyList(url);
+                }
+            });
+            
+            document.getElementById('back-to-list').addEventListener('click', function() {
+                showProxyListSection();
+            });
+            
+            document.getElementById('back-to-form').addEventListener('click', function() {
+                resultSection.classList.add('hidden');
+                accountCreationSection.classList.remove('hidden');
+            });
+            
+            document.getElementById('create-new').addEventListener('click', function() {
+                resultSection.classList.add('hidden');
+                accountCreationSection.classList.remove('hidden');
+            });
+            
+            document.getElementById('back-to-list-from-result').addEventListener('click', function() {
+                showProxyListSection();
+            });
+            
+            // Protocol tabs
+            const protocolTabs = document.querySelectorAll('.protocol-tab');
+            const protocolForms = document.querySelectorAll('.protocol-form');
+            
+            protocolTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    protocolTabs.forEach(t => {
+                        t.classList.remove('border-blue-500', 'text-blue-500');
+                        t.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    
+                    // Add active class to clicked tab
+                    tab.classList.remove('border-transparent', 'text-gray-500');
+                    tab.classList.add('border-blue-500', 'text-blue-500');
+                    
+                    // Hide all forms
+                    protocolForms.forEach(form => {
+                        form.classList.add('hidden');
+                    });
+                    
+                    // Show the selected form
+                    const targetId = tab.getAttribute('data-target');
+                    document.getElementById(targetId).classList.remove('hidden');
+                });
+            });
+            
+            // Show/hide plugin options for Shadowsocks
+            const ssPlugin = document.getElementById('ss-plugin');
+            const ssPluginOptions = document.getElementById('ss-plugin-options');
+            
+            ssPlugin.addEventListener('change', () => {
+                if (ssPlugin.value !== 'none') {
+                    ssPluginOptions.classList.remove('hidden');
+                } else {
+                    ssPluginOptions.classList.add('hidden');
+                }
+            });
+            
+            // Form submissions
+            const forms = [
+                document.getElementById('vmess-account-form'),
+                document.getElementById('vless-account-form'),
+                document.getElementById('trojan-account-form'),
+                document.getElementById('ss-account-form')
+            ];
+            
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Get form data
+                    const formData = new FormData(form);
+                    const formType = form.id.split('-')[0]; // vmess, vless, trojan, or ss
+                    
+                    // Generate connection URL based on protocol
+                    let connectionUrl = '';
+                    
+                    if (formType === 'vmess') {
+                        const vmessConfig = {
+                            v: '2',
+                            ps: formData.get('name'),
+                            add: serverDomain,
+                            port: 443,
+                            id: formData.get('uuid'),
+                            aid: '0',
+                            net: formData.get('network'),
+                            type: 'none',
+                            host: serverDomain,
+                            path: formData.get('path'),
+                            tls: formData.get('security') === 'tls' ? 'tls' : '',
+                            sni: serverDomain,
+                            scy: formData.get('encryption')
+                        };
+                        
+                        connectionUrl = 'vmess://' + btoa(JSON.stringify(vmessConfig));
+                    } else if (formType === 'vless') {
+                        const uuid = formData.get('uuid');
+                        const path = encodeURIComponent(formData.get('path'));
+                        const security = formData.get('security');
+                        const encryption = formData.get('encryption');
+                        const network = formData.get('network');
+                        const name = encodeURIComponent(formData.get('name'));
+                        
+                        connectionUrl = `vless://${uuid}@${serverDomain}:443?encryption=${encryption}&security=${security}&type=${network}&host=${serverDomain}&path=${path}#${name}`;
+                    } else if (formType === 'trojan') {
+                        const password = formData.get('password');
+                        const path = encodeURIComponent(formData.get('path'));
+                        const security = formData.get('security');
+                        const network = formData.get('network');
+                        const sni = serverDomain;
+                        const name = encodeURIComponent(formData.get('name'));
+                        
+                        connectionUrl = `trojan://${password}@${serverDomain}:443?security=${security}&type=${network}&host=${serverDomain}&path=${path}&sni=${sni}#${name}`;
+                    } else if (formType === 'ss') {
+                        const password = formData.get('password');
+                        const method = formData.get('method');
+                        const name = encodeURIComponent(formData.get('name'));
+                        const plugin = formData.get('plugin');
+                        const pluginOpts = formData.get('plugin-opts');
+                        
+                        // Base64 encode the method:password part
+                        const userInfo = btoa(`${method}:${password}`);
+                        
+                        if (plugin !== 'none' && pluginOpts) {
+                            connectionUrl = `ss://${userInfo}@${serverDomain}:443?plugin=${encodeURIComponent(plugin + ';' + pluginOpts)}#${name}`;
+                        } else {
+                            connectionUrl = `ss://${userInfo}@${serverDomain}:443#${name}`;
+                        }
+                    }
+                    
+                    // Display the result
+                    document.getElementById('connection-url').textContent = connectionUrl;
+                    
+                    // Generate QR code
+                    const qrcodeElement = document.getElementById('qrcode');
+                    qrcodeElement.innerHTML = '';
+                    QRCode.toCanvas(qrcodeElement, connectionUrl, { width: 200 }, function (error) {
+                        if (error) console.error(error);
+                    });
+                    
+                    // Show result section
+                    accountCreationSection.classList.add('hidden');
+                    resultSection.classList.remove('hidden');
+                });
+            });
+            
+            // Copy URL button
+            document.getElementById('copy-url').addEventListener('click', function() {
+                const connectionUrl = document.getElementById('connection-url').textContent;
+                navigator.clipboard.writeText(connectionUrl).then(() => {
+                    this.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="far fa-copy mr-1"></i> Copy';
+                    }, 2000);
+                });
+            });
+            
+            // Download QR code button
+            document.getElementById('download-qr').addEventListener('click', function() {
+                const canvas = document.querySelector('#qrcode canvas');
+                if (canvas) {
+                    const image = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = image;
+                    link.download = 'qrcode.png';
+                    link.click();
+                }
+            });
+        });
+        
+        // Function to load proxy list from URL
+        async function loadProxyList(url) {
+            try {
+                // Show loading indicator
+                loadingIndicator.classList.remove('hidden');
+                proxyTableBody.innerHTML = '';
+                noProxiesMessage.classList.add('hidden');
+                
+                // Fetch proxy list
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch proxy list');
+                }
+                
+                const text = await response.text();
+                const lines = text.trim().split('\n');
+                
+                // Parse proxy list
+                proxyList = lines.map(line => {
+                    const [ip, port, country, provider] = line.split(',');
+                    return { ip, port, country, provider };
+                }).filter(proxy => proxy.ip && proxy.port && proxy.country && proxy.provider);
+                
+                // Populate table
+                if (proxyList.length > 0) {
+                    proxyList.forEach((proxy, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="py-2 px-4 border-b border-gray-200">${proxy.ip}</td>
+                            <td class="py-2 px-4 border-b border-gray-200">${proxy.port}</td>
+                            <td class="py-2 px-4 border-b border-gray-200">${proxy.country}</td>
+                            <td class="py-2 px-4 border-b border-gray-200">${proxy.provider}</td>
+                            <td class="py-2 px-4 border-b border-gray-200">
+                                <button class="create-account-btn bg-blue-500 text-white py-1 px-2 rounded text-xs" data-index="${index}">
+                                    Create Account
+                                </button>
+                            </td>
+                        `;
+                        proxyTableBody.appendChild(row);
+                    });
+                    
+                    // Add event listeners to create account buttons
+                    document.querySelectorAll('.create-account-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            selectProxy(index);
+                            showAccountCreationSection();
+                        });
+                    });
+                } else {
+                    noProxiesMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading proxy list:', error);
+                noProxiesMessage.classList.remove('hidden');
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+        
+        // Function to select a proxy
+        function selectProxy(index) {
+            selectedProxy = proxyList[index];
+            
+            // Update selected proxy info
+            document.getElementById('selected-ip').textContent = selectedProxy.ip;
+            document.getElementById('selected-port').textContent = selectedProxy.port;
+            document.getElementById('selected-country').textContent = selectedProxy.country;
+            document.getElementById('selected-provider').textContent = selectedProxy.provider;
+            
+            // Update form fields
+            const accountName = `${selectedProxy.country} - ${selectedProxy.provider}`;
+            const path = `/${selectedProxy.ip}-${selectedProxy.port}`;
+            
+            document.getElementById('vmess-name').value = accountName;
+            document.getElementById('vless-name').value = accountName;
+            document.getElementById('trojan-name').value = accountName;
+            document.getElementById('ss-name').value = accountName;
+            
+            document.getElementById('vmess-path').value = path;
+            document.getElementById('vless-path').value = path;
+            document.getElementById('trojan-path').value = path;
+            
+            // Set default UUID
+            document.getElementById('vmess-uuid').value = defaultUUID;
+            document.getElementById('vless-uuid').value = defaultUUID;
+            
+            // Generate passwords
+            generatePassword('trojan-password');
+            generatePassword('ss-password');
+        }
+        
+        // Function to show proxy list section
+        function showProxyListSection() {
+            proxyListSection.classList.remove('hidden');
+            accountCreationSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+        }
+        
+        // Function to show account creation section
+        function showAccountCreationSection() {
+            proxyListSection.classList.add('hidden');
+            accountCreationSection.classList.remove('hidden');
+            resultSection.classList.add('hidden');
+        }
+        
+        // Helper functions
+        function generateUUID(elementId) {
+            document.getElementById(elementId).value = defaultUUID;
+        }
+        
+        function generatePassword(elementId) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            let password = '';
+            for (let i = 0; i < 16; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById(elementId).value = password;
+        }
+    </script>
+</body>
 </html>
