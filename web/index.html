@@ -6,6 +6,8 @@
 <title>Proxy Account Generator</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- QR Code Library - Using a more reliable version -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
     :root {
         --primary-glow: conic-gradient(from 180deg at 50% 50%, #16abff33 0deg, #0885ff33 55deg, #54d6ff33 120deg, #0071ff33 160deg, transparent 360deg);
@@ -207,104 +209,6 @@
         100% { transform: rotate(360deg); }
     }
     
-    .latency-badge {
-        padding: 2px 8px;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-    
-    .latency-good {
-        background-color: rgba(34, 197, 94, 0.2);
-        color: #4ade80;
-    }
-    
-    .latency-medium {
-        background-color: rgba(234, 179, 8, 0.2);
-        color: #facc15;
-    }
-    
-    .latency-poor {
-        background-color: rgba(239, 68, 68, 0.2);
-        color: #f87171;
-    }
-    
-    .status-badge {
-        padding: 2px 8px;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-    
-    .status-active {
-        background-color: rgba(34, 197, 94, 0.2);
-        color: #4ade80;
-    }
-    
-    .status-inactive {
-        background-color: rgba(239, 68, 68, 0.2);
-        color: #f87171;
-    }
-    
-    .status-checking {
-        background-color: rgba(234, 179, 8, 0.2);
-        color: #facc15;
-    }
-    
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: rgba(15, 23, 42, 0.8);
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background-image: var(--tech-gradient);
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background-image: var(--tech-gradient-hover);
-    }
-    
-    .proxy-status-card {
-        background-color: rgba(30, 41, 59, 0.5);
-        border-radius: 0.5rem;
-        padding: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-    }
-    
-    .pulse-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 6px;
-        animation: pulse 1.5s infinite ease-in-out;
-    }
-    
-    .pulse-dot.active {
-        background-color: #4ade80;
-        box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
-    }
-    
-    .pulse-dot.inactive {
-        background-color: #f87171;
-        box-shadow: 0 0 8px rgba(248, 113, 113, 0.8);
-    }
-    
-    .pulse-dot.checking {
-        background-color: #facc15;
-        box-shadow: 0 0 8px rgba(250, 204, 21, 0.8);
-    }
-    
     /* Mobile optimizations */
     .proxy-card {
         background-color: rgba(30, 41, 59, 0.5);
@@ -325,6 +229,48 @@
         font-size: 0.8rem;
     }
     
+    /* Pagination styles */
+    .pagination-btn {
+        min-width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .pagination-btn.active {
+        background-image: var(--tech-gradient);
+        color: white;
+    }
+
+    .pagination-btn:not(.active):not(.disabled):hover {
+        background-color: rgba(51, 65, 85, 0.5);
+    }
+
+    .pagination-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* QR Code container */
+    .qrcode-container {
+        background-color: white;
+        padding: 10px;
+        border-radius: 8px;
+        display: inline-block;
+        margin: 0 auto;
+    }
+
+    .qrcode-container img, 
+    .qrcode-container canvas {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+
     @media (max-width: 640px) {
         .tech-tab {
             padding: 0.5rem 0.75rem;
@@ -333,6 +279,12 @@
         
         .tech-tab i {
             margin-right: 0.25rem;
+        }
+        
+        .pagination-btn {
+            min-width: 28px;
+            height: 28px;
+            font-size: 0.75rem;
         }
     }
 </style>
@@ -386,6 +338,16 @@
                     <!-- Proxy cards will be populated here -->
                 </div>
                 
+                <!-- Pagination controls -->
+                <div id="pagination-container" class="flex justify-center items-center mt-4 space-x-1">
+                    <!-- Pagination buttons will be added here -->
+                </div>
+
+                <!-- Proxy count info -->
+                <div id="proxy-count-info" class="text-center mt-3 text-xs text-gray-400">
+                    <!-- Proxy count will be shown here -->
+                </div>
+                
                 <div id="no-proxies-message" class="text-center py-8 hidden">
                     <i class="fas fa-exclamation-circle text-yellow-400 text-3xl mb-2"></i>
                     <p class="text-gray-400 text-sm">No proxies found. Please refresh or try a different URL.</p>
@@ -409,12 +371,6 @@
                     <div class="bg-slate-800/50 p-4 rounded-lg mb-4 border border-slate-700/50">
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="text-sm font-medium text-sky-400">Selected Proxy</h3>
-                            <div id="proxy-check-loading" class="hidden">
-                                <div class="flex items-center">
-                                    <div class="loading-spinner-sm mr-2"></div>
-                                    <span class="text-xs text-gray-400">Checking...</span>
-                                </div>
-                            </div>
                         </div>
                         
                         <div id="proxy-basic-info" class="grid grid-cols-2 gap-3 mb-3">
@@ -433,26 +389,6 @@
                             <div class="bg-slate-900/50 p-2 rounded-lg">
                                 <span class="text-xs text-gray-400 block mb-1">Port:</span>
                                 <span id="selected-port" class="text-sm font-medium text-white">-</span>
-                            </div>
-                        </div>
-                        
-                        <div id="proxy-status-container" class="mt-3">
-                            <div class="tech-divider my-3 opacity-50"></div>
-                            
-                            <div class="proxy-status-card">
-                                <div class="flex items-center">
-                                    <span id="status-indicator" class="pulse-dot checking"></span>
-                                    <span id="proxy-status" class="font-medium text-sm">Checking status...</span>
-                                </div>
-                                
-                                <div id="latency-container" class="hidden ml-2">
-                                    <span class="text-xs text-gray-400 mr-1">Latency:</span>
-                                    <span id="proxy-latency" class="latency-badge latency-medium">-</span>
-                                </div>
-                                
-                                <button id="check-proxy-btn" class="tech-btn-secondary py-1 px-2 rounded text-xs ml-auto">
-                                    <i class="fas fa-sync-alt mr-1"></i> Check
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -496,23 +432,13 @@
                                 <input type="text" id="vmess-path" name="path" class="w-full px-3 py-2 tech-input rounded-md text-sm" readonly>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label for="vmess-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
-                                    <select id="vmess-security" name="security" class="w-full px-3 py-2 tech-select rounded-md text-sm">
-                                        <option value="tls">TLS</option>
-                                        <option value="none">None</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="vmess-encryption" class="block text-sm font-medium text-gray-300 mb-1">Encryption</label>
-                                    <select id="vmess-encryption" name="encryption" class="w-full px-3 py-2 tech-select rounded-md text-sm">
-                                        <option value="auto">Auto</option>
-                                        <option value="zero">Zero</option>
-                                        <option value="aes-128-gcm">AES-128-GCM</option>
-                                        <option value="chacha20-poly1305">ChaCha20</option>
-                                    </select>
-                                </div>
+                            <div>
+                                <label for="vmess-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
+                                <select id="vmess-security" name="security" class="w-full px-3 py-2 tech-select rounded-md text-sm">
+                                    <option value="tls">TLS</option>
+                                    <option value="none">None</option>
+                                </select>
+                                <input type="hidden" id="vmess-encryption" name="encryption" value="zero">
                             </div>
                             
                             <div class="pt-2">
@@ -546,20 +472,13 @@
                                 <input type="text" id="vless-path" name="path" class="w-full px-3 py-2 tech-input rounded-md text-sm" readonly>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label for="vless-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
-                                    <select id="vless-security" name="security" class="w-full px-3 py-2 tech-select rounded-md text-sm">
-                                        <option value="tls">TLS</option>
-                                        <option value="none">None</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="vless-encryption" class="block text-sm font-medium text-gray-300 mb-1">Encryption</label>
-                                    <select id="vless-encryption" name="encryption" class="w-full px-3 py-2 tech-select rounded-md text-sm">
-                                        <option value="none">None</option>
-                                    </select>
-                                </div>
+                            <div>
+                                <label for="vless-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
+                                <select id="vless-security" name="security" class="w-full px-3 py-2 tech-select rounded-md text-sm">
+                                    <option value="tls">TLS</option>
+                                    <option value="none">None</option>
+                                </select>
+                                <input type="hidden" id="vless-encryption" name="encryption" value="none">
                             </div>
                             
                             <div class="pt-2">
@@ -593,18 +512,13 @@
                                 <input type="text" id="trojan-path" name="path" class="w-full px-3 py-2 tech-input rounded-md text-sm" readonly>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label for="trojan-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
-                                    <select id="trojan-security" name="security" class="w-full px-3 py-2 tech-select rounded-md text-sm">
-                                        <option value="tls">TLS</option>
-                                        <option value="none">None</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="trojan-sni" class="block text-sm font-medium text-gray-300 mb-1">SNI</label>
-                                    <input type="text" id="trojan-sni" name="sni" class="w-full px-3 py-2 tech-input rounded-md text-sm" value="mode.t-me-inconigto.workers.dev" readonly>
-                                </div>
+                            <div>
+                                <label for="trojan-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
+                                <select id="trojan-security" name="security" class="w-full px-3 py-2 tech-select rounded-md text-sm">
+                                    <option value="tls">TLS</option>
+                                    <option value="none">None</option>
+                                </select>
+                                <input type="hidden" id="trojan-sni" name="sni" value="mode.inconigto-mode.web.id">
                             </div>
                             
                             <div class="pt-2">
@@ -688,7 +602,7 @@
                             </button>
                         </div>
                         <div class="flex justify-center py-4">
-                            <div id="qrcode" class="bg-white p-2 rounded-lg"></div>
+                            <div id="qrcode" class="qrcode-container"></div>
                         </div>
                     </div>
                     
@@ -709,16 +623,16 @@
     </div>
 </div>
 
-<!-- QR Code Library -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-
 <script>
 // Global variables
 let proxyList = [];
+let filteredProxyList = [];
 let selectedProxy = null;
 const defaultProxyUrl = 'https://raw.githubusercontent.com/InconigtoMode/proxylist/refs/heads/main/all.txt';
-const serverDomain = 'mode.t-me-inconigto.workers.dev';
+const serverDomain = 'mode.inconigto-mode.web.id';
 const defaultUUID = '00000000-0000-0000-0000-000000000000';
+const itemsPerPage = 10;
+let currentPage = 1;
 
 // DOM elements
 const proxyListSection = document.getElementById('proxy-list-section');
@@ -729,6 +643,8 @@ const proxyListContainer = document.getElementById('proxy-list-container');
 const noProxiesMessage = document.getElementById('no-proxies-message');
 const customUrlInput = document.getElementById('custom-url-input');
 const proxyUrlInput = document.getElementById('proxy-url');
+const paginationContainer = document.getElementById('pagination-container');
+const proxyCountInfo = document.getElementById('proxy-count-info');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
@@ -770,13 +686,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('back-to-list-from-result').addEventListener('click', function() {
         showProxyListSection();
-    });
-    
-    // Check proxy button
-    document.getElementById('check-proxy-btn').addEventListener('click', function() {
-        if (selectedProxy) {
-            checkProxyStatus(selectedProxy.ip, selectedProxy.port);
-        }
     });
     
     // Protocol tabs
@@ -841,7 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     path: formData.get('path'),
                     tls: security === 'tls' ? 'tls' : '',
                     sni: serverDomain,
-                    scy: formData.get('encryption')
+                    scy: 'zero'
                 };
                 
                 connectionUrl = 'vmess://' + btoa(JSON.stringify(vmessConfig));
@@ -849,7 +758,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const uuid = formData.get('uuid');
                 const path = encodeURIComponent(formData.get('path'));
                 const security = formData.get('security');
-                const encryption = formData.get('encryption');
+                const encryption = 'none';
                 const name = encodeURIComponent(formData.get('name'));
                 // Set port based on TLS setting
                 const port = security === 'tls' ? 443 : 80;
@@ -884,12 +793,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Display the result
             document.getElementById('connection-url').textContent = connectionUrl;
             
-            // Generate QR code
-            const qrcodeElement = document.getElementById('qrcode');
-            qrcodeElement.innerHTML = '';
-            QRCode.toCanvas(qrcodeElement, connectionUrl, { width: 180 }, function (error) {
-                if (error) console.error(error);
-            });
+            // Generate QR code - Improved with multiple fallback methods
+            generateQRCode(connectionUrl);
             
             // Show result section
             accountCreationSection.classList.add('hidden');
@@ -910,30 +815,231 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Download QR code button
     document.getElementById('download-qr').addEventListener('click', function() {
-        const canvas = document.querySelector('#qrcode canvas');
-        if (canvas) {
-            const image = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = 'qrcode.png';
-            link.click();
-        }
+        downloadQRCode();
     });
 });
+
+// Improved QR code generation with multiple fallback methods
+function generateQRCode(text) {
+    const qrcodeElement = document.getElementById('qrcode');
+    qrcodeElement.innerHTML = '';
+    
+    // Try multiple methods to generate QR code
+    try {
+        // Method 1: Try to generate QR code using toCanvas
+        QRCode.toCanvas(qrcodeElement, text, { 
+            width: 200,
+            margin: 1,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        }, function(error) {
+            if (error) {
+                console.error("QR Code canvas error:", error);
+                // If canvas fails, try method 2
+                generateQRCodeFallback(text, qrcodeElement);
+            }
+        });
+    } catch (error) {
+        console.error("QR Code generation error:", error);
+        // If method 1 fails completely, try method 2
+        generateQRCodeFallback(text, qrcodeElement);
+    }
+}
+
+// Fallback QR code generation method
+function generateQRCodeFallback(text, container) {
+    try {
+        // Method 2: Try to generate QR code as SVG
+        QRCode.toString(text, {
+            type: 'svg',
+            width: 200,
+            margin: 1,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        }, function(error, svg) {
+            if (error || !svg) {
+                console.error("QR Code SVG error:", error);
+                // If SVG fails, try method 3
+                generateQRCodeLastResort(text, container);
+            } else {
+                container.innerHTML = svg;
+            }
+        });
+    } catch (error) {
+        console.error("QR Code SVG generation error:", error);
+        // If method 2 fails completely, try method 3
+        generateQRCodeLastResort(text, container);
+    }
+}
+
+// Last resort QR code generation method
+function generateQRCodeLastResort(text, container) {
+    try {
+        // Method 3: Try to generate QR code as data URL
+        const encodedText = encodeURIComponent(text);
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedText}`;
+        
+        const img = document.createElement('img');
+        img.src = qrApiUrl;
+        img.alt = "QR Code";
+        img.width = 200;
+        img.height = 200;
+        img.onerror = function() {
+            container.innerHTML = '<div class="text-center text-red-500">Failed to generate QR code</div>';
+        };
+        
+        container.innerHTML = '';
+        container.appendChild(img);
+    } catch (error) {
+        console.error("QR Code last resort error:", error);
+        container.innerHTML = '<div class="text-center text-red-500">Failed to generate QR code</div>';
+    }
+}
+
+// Download QR code function
+function downloadQRCode() {
+    const qrcodeElement = document.getElementById('qrcode');
+    
+    // Try to find canvas or img in the QR code container
+    const canvas = qrcodeElement.querySelector('canvas');
+    const img = qrcodeElement.querySelector('img');
+    const svg = qrcodeElement.querySelector('svg');
+    
+    let imageUrl = null;
+    
+    if (canvas) {
+        // If canvas exists, convert it to data URL
+        try {
+            imageUrl = canvas.toDataURL('image/png');
+        } catch (e) {
+            console.error("Canvas to data URL error:", e);
+        }
+    } else if (img) {
+        // If img exists, use its src
+        imageUrl = img.src;
+    } else if (svg) {
+        // If SVG exists, convert it to data URL
+        try {
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            imageUrl = URL.createObjectURL(svgBlob);
+        } catch (e) {
+            console.error("SVG to data URL error:", e);
+        }
+    }
+    
+    if (imageUrl) {
+        // Create a link and trigger download
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = 'qrcode.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Revoke object URL if it was created from a blob
+        if (imageUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(imageUrl);
+        }
+    } else {
+        alert('Failed to download QR code. Please try again.');
+    }
+}
 
 // Function to display fallback proxy list
 function displayFallbackProxyList() {
     // Add a fallback proxy list for immediate display
-    proxyList = [
-        { ip: '103.6.207.108', port: '8080', country: 'ID', provider: 'PT Pusat Media Indonesia' },
-        { ip: '10.0.0.1', port: '3128', country: 'UK', provider: 'Test Provider 2' },
-        { ip: '172.16.0.1', port: '80', country: 'JP', provider: 'Test Provider 3' }
-    ];
+    proxyList = [];
     
-    // Populate list with fallback data
+    filteredProxyList = [...proxyList];
+    renderProxyList();
+}
+
+// Process proxy list data
+function processProxyData(text) {
+    // Handle different line endings and remove empty lines
+    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+    console.log(`Found ${lines.length} lines in proxy data`);
+    
+    if (lines.length === 0) {
+        noProxiesMessage.classList.remove('hidden');
+        return; // No data to process
+    }
+    
+    // Try to determine the format of the data
+    let delimiter = ','; // Default delimiter
+    
+    // Check if the data uses tabs or other delimiters
+    const firstLine = lines[0];
+    if (firstLine.includes('\t')) {
+        delimiter = '\t';
+    } else if (firstLine.includes('|')) {
+        delimiter = '|';
+    } else if (firstLine.includes(';')) {
+        delimiter = ';';
+    }
+    
+    // Parse proxy list with the detected delimiter
+    proxyList = lines.map(line => {
+        const parts = line.split(delimiter);
+        
+        // Require at least IP and port
+        if (parts.length >= 2) {
+            return {
+                ip: parts[0].trim(),
+                port: parts[1].trim(),
+                country: parts.length >= 3 ? parts[2].trim() : 'Unknown',
+                provider: parts.length >= 4 ? parts[3].trim() : 'Unknown Provider'
+            };
+        }
+        return null;
+    }).filter(proxy => proxy && proxy.ip && proxy.port);
+    
+    console.log(`Processed ${proxyList.length} valid proxies`);
+    
+    // If no valid proxies were found, show message and use fallback
+    if (proxyList.length === 0) {
+        noProxiesMessage.classList.remove('hidden');
+        displayFallbackProxyList();
+        return;
+    }
+    
+    // Reset pagination
+    currentPage = 1;
+    filteredProxyList = [...proxyList];
+    
+    // Render the proxy list
+    renderProxyList();
+}
+
+// Function to render the proxy list with pagination
+function renderProxyList() {
     proxyListContainer.innerHTML = '';
     
-    proxyList.forEach((proxy, index) => {
+    if (filteredProxyList.length === 0) {
+        noProxiesMessage.classList.remove('hidden');
+        paginationContainer.innerHTML = '';
+        proxyCountInfo.textContent = '';
+        return;
+    }
+    
+    noProxiesMessage.classList.add('hidden');
+    
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredProxyList.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredProxyList.length);
+    
+    // Get current page items
+    const currentItems = filteredProxyList.slice(startIndex, endIndex);
+    
+    // Render proxy cards
+    currentItems.forEach((proxy, index) => {
+        const actualIndex = startIndex + index;
         const card = document.createElement('div');
         card.className = 'proxy-card';
         card.innerHTML = `
@@ -942,7 +1048,7 @@ function displayFallbackProxyList() {
                     <div class="font-medium text-sm">${proxy.provider}</div>
                     <div class="text-xs text-gray-400">${proxy.country}</div>
                 </div>
-                <button class="create-account-btn tech-btn py-1 px-2 rounded text-xs" data-index="${index}">
+                <button class="create-account-btn tech-btn py-1 px-2 rounded text-xs" data-index="${actualIndex}">
                     Create Account
                 </button>
             </div>
@@ -958,233 +1064,107 @@ function displayFallbackProxyList() {
             showAccountCreationSection();
         });
     });
+    
+    // Render pagination controls
+    renderPagination(totalPages);
+    
+    // Update proxy count info
+    proxyCountInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredProxyList.length} proxies`;
 }
 
-// Function to load proxy list from URL
-async function loadProxyList(url) {
-    try {
-        // Show loading indicator
-        loadingIndicator.classList.remove('hidden');
-        proxyListContainer.innerHTML = '';
-        noProxiesMessage.classList.add('hidden');
-        
-        // Try with direct fetch first
-        try {
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                throw new Error('Direct fetch failed');
-            }
-            
-            const text = await response.text();
-            console.log("Fetched data:", text); // Debug log
-            
-            processProxyData(text);
-        } catch (directError) {
-            console.error('Direct fetch failed:', directError);
-            
-            // Try with a different CORS proxy if direct fetch fails
-            try {
-                const jsonpUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const response = await fetch(jsonpUrl);
-                
-                if (!response.ok) {
-                    throw new Error('CORS proxy fetch failed');
-                }
-                
-                const data = await response.json();
-                console.log("Fetched data via CORS proxy:", data.contents); // Debug log
-                
-                processProxyData(data.contents);
-            } catch (corsError) {
-                console.error('CORS proxy fetch failed:', corsError);
-                // Fall back to using the existing fallback proxy list
-                // which is already displayed
-            }
+// Function to render pagination controls
+function renderPagination(totalPages) {
+    paginationContainer.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `pagination-btn tech-btn-secondary ${currentPage === 1 ? 'disabled' : ''}`;
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderProxyList();
         }
-    } catch (error) {
-        console.error('Error loading proxy list:', error);
-        // The fallback list is already displayed at this point
-    } finally {
-        loadingIndicator.classList.add('hidden');
-    }
-}
-
-// Process proxy list data
-function processProxyData(text) {
-    // Handle different line endings
-    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-    console.log("Parsed lines:", lines); // Debug log
+    });
+    paginationContainer.appendChild(prevBtn);
     
-    if (lines.length === 0) {
-        return; // No data to process
+    // Page numbers
+    const maxVisiblePages = window.innerWidth < 640 ? 3 : 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
     
-    // Clear existing proxy list
-    proxyListContainer.innerHTML = '';
-    
-    // Parse proxy list
-    proxyList = lines.map(line => {
-        const parts = line.split(',');
-        if (parts.length >= 4) {
-            return {
-                ip: parts[0].trim(),
-                port: parts[1].trim(),
-                country: parts[2].trim(),
-                provider: parts[3].trim()
-            };
-        }
-        return null;
-    }).filter(proxy => proxy && proxy.ip && proxy.port && proxy.country && proxy.provider);
-    
-    console.log("Processed proxy list:", proxyList); // Debug log
-    
-    // Populate list
-    if (proxyList.length > 0) {
-        proxyList.forEach((proxy, index) => {
-            const card = document.createElement('div');
-            card.className = 'proxy-card';
-            card.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <div class="font-medium text-sm">${proxy.provider}</div>
-                        <div class="text-xs text-gray-400">${proxy.country}</div>
-                    </div>
-                    <button class="create-account-btn tech-btn py-1 px-2 rounded text-xs" data-index="${index}">
-                        Create Account
-                    </button>
-                </div>
-            `;
-            proxyListContainer.appendChild(card);
+    // First page button if not visible
+    if (startPage > 1) {
+        const firstPageBtn = document.createElement('button');
+        firstPageBtn.className = 'pagination-btn tech-btn-secondary';
+        firstPageBtn.textContent = '1';
+        firstPageBtn.addEventListener('click', () => {
+            currentPage = 1;
+            renderProxyList();
         });
+        paginationContainer.appendChild(firstPageBtn);
         
-        // Add event listeners to create account buttons
-        document.querySelectorAll('.create-account-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const index = parseInt(this.getAttribute('data-index'));
-                selectProxy(index);
-                showAccountCreationSection();
-            });
-        });
-    } else {
-        noProxiesMessage.classList.remove('hidden');
-    }
-}
-
-// Function to check proxy status - simplified to only check if active or dead
-function checkProxyStatus(ip, port) {
-    // Update UI to show checking state
-    const statusIndicator = document.getElementById('status-indicator');
-    const statusText = document.getElementById('proxy-status');
-    const latencyContainer = document.getElementById('latency-container');
-    
-    statusIndicator.className = 'pulse-dot checking';
-    statusText.textContent = 'Checking status...';
-    latencyContainer.classList.add('hidden');
-    
-    document.getElementById('proxy-check-loading').classList.remove('hidden');
-    
-    // Set a start time for latency calculation
-    const startTime = Date.now();
-    
-    // Try to fetch from the API directly
-    fetch(`https://cors-anywhere.herokuapp.com/https://proxyip.biz.id/${ip}:${port}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('API request failed');
-            }
-            return response.text();
-        })
-        .then(text => {
-            try {
-                // Try to parse as JSON
-                const data = JSON.parse(text);
-                const latency = Date.now() - startTime;
-                
-                // Update UI based on proxyip value
-                updateProxyStatusUI(data.proxyip === true, latency);
-            } catch (e) {
-                // If parsing fails, check if the text contains any indication of success
-                const isActive = text.toLowerCase().includes('true') && !text.toLowerCase().includes('false');
-                const latency = Date.now() - startTime;
-                
-                updateProxyStatusUI(isActive, latency);
-            }
-        })
-        .catch(error => {
-            console.error('Error checking proxy:', error);
-            
-            // If the API call fails, try a simple ping test
-            pingProxy(ip, port);
-        })
-        .finally(() => {
-            document.getElementById('proxy-check-loading').classList.add('hidden');
-        });
-}
-
-// Function to ping a proxy directly
-function pingProxy(ip, port) {
-    const startTime = Date.now();
-    const img = new Image();
-    
-    // Set a timeout for the ping
-    const timeout = setTimeout(() => {
-        updateProxyStatusUI(false, 0);
-    }, 5000);
-    
-    img.onload = function() {
-        clearTimeout(timeout);
-        const latency = Date.now() - startTime;
-        updateProxyStatusUI(true, latency);
-    };
-    
-    img.onerror = function() {
-        clearTimeout(timeout);
-        // Even if the image fails to load, the proxy might still be active
-        // We'll consider it active if we got a response within a reasonable time
-        const latency = Date.now() - startTime;
-        const isActive = latency < 3000; // If we got a quick error response, proxy might be active
-        updateProxyStatusUI(isActive, isActive ? latency : 0);
-    };
-    
-    // Try to load an image through the proxy
-    img.src = `http://${ip}:${port}`;
-}
-
-// Function to update the proxy status UI
-function updateProxyStatusUI(isActive, latency) {
-    const statusIndicator = document.getElementById('status-indicator');
-    const statusText = document.getElementById('proxy-status');
-    const latencyContainer = document.getElementById('latency-container');
-    const latencyElement = document.getElementById('proxy-latency');
-    
-    if (isActive) {
-        statusIndicator.className = 'pulse-dot active';
-        statusText.textContent = 'Active';
-        
-        if (latency > 0) {
-            latencyElement.textContent = latency + 'ms';
-            
-            // Set latency badge color based on speed
-            let latencyClass = 'latency-badge ';
-            if (latency < 300) {
-                latencyClass += 'latency-good';
-            } else if (latency < 800) {
-                latencyClass += 'latency-medium';
-            } else {
-                latencyClass += 'latency-poor';
-            }
-            latencyElement.className = latencyClass;
-            
-            latencyContainer.classList.remove('hidden');
-        } else {
-            latencyContainer.classList.add('hidden');
+        // Ellipsis if needed
+        if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'px-1 text-gray-400';
+            ellipsis.textContent = '...';
+            paginationContainer.appendChild(ellipsis);
         }
-    } else {
-        statusIndicator.className = 'pulse-dot inactive';
-        statusText.textContent = 'Dead';
-        latencyContainer.classList.add('hidden');
     }
+    
+    // Page buttons
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : 'tech-btn-secondary'}`;
+        pageBtn.textContent = i.toString();
+        pageBtn.addEventListener('click', () => {
+            currentPage = i;
+            renderProxyList();
+        });
+        paginationContainer.appendChild(pageBtn);
+    }
+    
+    // Last page button if not visible
+    if (endPage < totalPages) {
+        // Ellipsis if needed
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'px-1 text-gray-400';
+            ellipsis.textContent = '...';
+            paginationContainer.appendChild(ellipsis);
+        }
+        
+        const lastPageBtn = document.createElement('button');
+        lastPageBtn.className = 'pagination-btn tech-btn-secondary';
+        lastPageBtn.textContent = totalPages.toString();
+        lastPageBtn.addEventListener('click', () => {
+            currentPage = totalPages;
+            renderProxyList();
+        });
+        paginationContainer.appendChild(lastPageBtn);
+    }
+    
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `pagination-btn tech-btn-secondary ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderProxyList();
+        }
+    });
+    paginationContainer.appendChild(nextBtn);
 }
 
 // Function to select a proxy
@@ -1218,9 +1198,6 @@ async function selectProxy(index) {
     // Set default password (same as UUID)
     document.getElementById('trojan-password').value = defaultUUID;
     document.getElementById('ss-password').value = defaultUUID;
-    
-    // Check proxy status
-    checkProxyStatus(selectedProxy.ip, selectedProxy.port);
 }
 
 // Function to show proxy list section
@@ -1245,6 +1222,73 @@ function generateUUID(elementId) {
 function generatePassword(elementId) {
     // Set password to the default UUID instead of generating a random one
     document.getElementById(elementId).value = defaultUUID;
+}
+
+// Update the loadProxyList function to better handle GitHub data and CORS issues
+function loadProxyList(url) {
+    // Show loading indicator
+    loadingIndicator.classList.remove('hidden');
+    proxyListContainer.innerHTML = '';
+    noProxiesMessage.classList.add('hidden');
+    
+    // Try multiple CORS proxies in sequence
+    const corsProxies = [
+        // Direct fetch (no proxy)
+        async () => {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Direct fetch failed');
+            return await response.text();
+        },
+        // CORS Anywhere proxy
+        async () => {
+            const corsUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+            const response = await fetch(corsUrl);
+            if (!response.ok) throw new Error('CORS Anywhere proxy failed');
+            return await response.text();
+        },
+        // AllOrigins proxy
+        async () => {
+            const corsUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const response = await fetch(corsUrl);
+            if (!response.ok) throw new Error('AllOrigins proxy failed');
+            const data = await response.json();
+            return data.contents;
+        },
+        // CORS.sh proxy
+        async () => {
+            const corsUrl = `https://cors.sh/${url}`;
+            const response = await fetch(corsUrl, {
+                headers: {
+                    'x-cors-api-key': 'temp_' + Math.random().toString(36).substring(2,12),
+                }
+            });
+            if (!response.ok) throw new Error('CORS.sh proxy failed');
+            return await response.text();
+        }
+    ];
+    
+    // Try each proxy in sequence
+    (async function tryProxies(index = 0) {
+        if (index >= corsProxies.length) {
+            console.error('All proxies failed');
+            loadingIndicator.classList.add('hidden');
+            noProxiesMessage.classList.remove('hidden');
+            // Fall back to sample data
+            displayFallbackProxyList();
+            return;
+        }
+        
+        try {
+            const text = await corsProxies[index]();
+            console.log("Fetched data:", text.substring(0, 200) + "..."); // Debug log (truncated)
+            processProxyData(text);
+            loadingIndicator.classList.add('hidden');
+        } catch (error) {
+            console.error(`Proxy ${index} failed:`, error);
+            // Try next proxy
+            tryProxies(index + 1);
+        }
+    })();
 }
 </script>
 </body>
