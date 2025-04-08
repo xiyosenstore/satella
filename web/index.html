@@ -1,724 +1,1361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proxy Account Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proxy Account Generator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-glow: conic-gradient(from 180deg at 50% 50%, #16abff33 0deg, #0885ff33 55deg, #54d6ff33 120deg, #0071ff33 160deg, transparent 360deg);
+        --secondary-glow: radial-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+        --tech-gradient: linear-gradient(to right, #0ea5e9, #2563eb);
+        --tech-gradient-hover: linear-gradient(to right, #0284c7, #1e40af);
+        --tech-glow: 0 0 15px rgba(14, 165, 233, 0.5);
+        --tech-border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+    
+    body {
+        background-color: #0f172a;
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(79, 70, 229, 0.1) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
+            radial-gradient(at 0% 100%, rgba(34, 211, 238, 0.1) 0px, transparent 50%);
+        color: #e2e8f0;
+        min-height: 100vh;
+    }
+    
+    .tech-card {
+        background-color: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(10px);
+        border: var(--tech-border);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .tech-input {
+        background-color: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+        color: #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .tech-input:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+        background-color: rgba(30, 41, 59, 0.95);
+    }
+    
+    .tech-input[readonly] {
+        background-color: rgba(51, 65, 85, 0.5);
+    }
+    
+    .tech-select {
+        background-color: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+        color: #e2e8f0;
+    }
+    
+    .tech-select:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+    }
+    
+    .tech-btn {
+        background-image: var(--tech-gradient);
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .tech-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: var(--tech-gradient-hover);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+    
+    .tech-btn:hover::before {
+        opacity: 1;
+    }
+    
+    .tech-btn:focus {
+        box-shadow: var(--tech-glow);
+    }
+    
+    .tech-btn-secondary {
+        background-color: rgba(51, 65, 85, 0.8);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+        transition: all 0.3s ease;
+    }
+    
+    .tech-btn-secondary:hover {
+        background-color: rgba(71, 85, 105, 0.8);
+        border-color: rgba(100, 116, 139, 0.5);
+    }
+    
+    .tech-btn-secondary:focus {
+        box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.3);
+    }
+    
+    .tech-tab {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .tech-tab.active {
+        color: #0ea5e9;
+    }
+    
+    .tech-tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-image: var(--tech-gradient);
+        box-shadow: var(--tech-glow);
+    }
+    
+    .tech-tab:not(.active) {
+        color: #94a3b8;
+    }
+    
+    .tech-tab:not(.active):hover {
+        color: #cbd5e1;
+    }
+    
+    .tech-table th {
+        background-color: rgba(30, 41, 59, 0.8);
+        color: #94a3b8;
+    }
+    
+    .tech-table td {
+        border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+    }
+    
+    .tech-table tr:hover td {
+        background-color: rgba(51, 65, 85, 0.3);
+    }
+    
+    .glow-text {
+        text-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+    }
+    
+    .tech-divider {
+        height: 1px;
+        background-image: var(--tech-gradient);
+        box-shadow: var(--tech-glow);
+    }
+    
+    .tech-badge {
+        background-color: rgba(14, 165, 233, 0.2);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        color: #38bdf8;
+    }
+    
+    .tech-code {
+        background-color: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(51, 65, 85, 0.5);
+        font-family: monospace;
+    }
+    
+    .tech-icon {
+        filter: drop-shadow(0 0 3px rgba(14, 165, 233, 0.5));
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+    
+    .pulse-animation {
+        animation: pulse 2s infinite ease-in-out;
+    }
+    
+    .loading-spinner {
+        border: 3px solid rgba(51, 65, 85, 0.3);
+        border-top: 3px solid #0ea5e9;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    .loading-spinner-sm {
+        border: 2px solid rgba(51, 65, 85, 0.3);
+        border-top: 2px solid #0ea5e9;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .latency-badge {
+        padding: 2px 8px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .latency-good {
+        background-color: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+    }
+    
+    .latency-medium {
+        background-color: rgba(234, 179, 8, 0.2);
+        color: #facc15;
+    }
+    
+    .latency-poor {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+    
+    .status-badge {
+        padding: 2px 8px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-active {
+        background-color: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+    }
+    
+    .status-inactive {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+    
+    .status-checking {
+        background-color: rgba(234, 179, 8, 0.2);
+        color: #facc15;
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(15, 23, 42, 0.8);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background-image: var(--tech-gradient);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background-image: var(--tech-gradient-hover);
+    }
+    
+    .proxy-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .proxy-detail-card {
+        background-color: rgba(30, 41, 59, 0.5);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .proxy-detail-card:hover {
+        background-color: rgba(30, 41, 59, 0.8);
+        transform: translateY(-2px);
+    }
+    
+    .map-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0.5rem;
+        height: 200px;
+        background-color: rgba(30, 41, 59, 0.5);
+    }
+    
+    .map-pin {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: #0ea5e9;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
+    }
+    
+    .map-pin::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(14, 165, 233, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse 2s infinite;
+    }
+    
+    #proxy-status-section {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: rgba(30, 41, 59, 0.5);
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+    }
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">INCONIGTO-VPN</h1>
-                
-                <!-- Proxy List Section -->
-                <div id="proxy-list-section">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-800">Proxy List</h2>
-                        <div class="flex space-x-2">
-                            <button id="refresh-btn" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                <i class="fas fa-sync-alt mr-2"></i>Refresh List
-                            </button>
-                            <button id="custom-url-btn" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                <i class="fas fa-link mr-2"></i>Custom URL
-                            </button>
-                        </div>
+<body class="font-sans">
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-5xl mx-auto tech-card rounded-xl overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-center mb-8">
+                <div class="mr-3">
+                    <i class="fas fa-network-wired text-4xl tech-icon text-sky-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-center glow-text bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-600">Proxy Account Generator</h1>
+            </div>
+            
+            <!-- Proxy List Section -->
+            <div id="proxy-list-section">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-server mr-2 text-sky-400"></i>
+                        <h2 class="text-xl font-semibold">Proxy List</h2>
                     </div>
-                    
-                    <div id="custom-url-input" class="mb-4 hidden">
-                        <div class="flex">
-                            <input type="text" id="proxy-url" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                                placeholder="Enter custom proxy list URL" 
-                                value="https://raw.githubusercontent.com/InconigtoMode/proxylist/refs/heads/main/all.txt">
-                            <button id="load-custom-url" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600">
-                                Load
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="loading-indicator" class="text-center py-8 hidden">
-                        <i class="fas fa-spinner fa-spin text-blue-500 text-4xl"></i>
-                        <p class="mt-2 text-gray-600">Loading proxy list...</p>
-                    </div>
-                    
-                    <div id="proxy-table-container" class="overflow-x-auto">
-                        <table class="min-w-full bg-white border border-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP</th>
-                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Port</th>
-                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
-                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
-                                    <th class="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="proxy-table-body">
-                                <!-- Proxy list will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div id="no-proxies-message" class="text-center py-8 hidden">
-                        <i class="fas fa-exclamation-circle text-yellow-500 text-4xl"></i>
-                        <p class="mt-2 text-gray-600">No proxies found. Please refresh or try a different URL.</p>
+                    <div class="flex space-x-3">
+                        <button id="refresh-btn" class="tech-btn py-2 px-4 rounded-md flex items-center">
+                            <i class="fas fa-sync-alt mr-2"></i>Refresh List
+                        </button>
+                        <button id="custom-url-btn" class="tech-btn-secondary py-2 px-4 rounded-md flex items-center">
+                            <i class="fas fa-link mr-2"></i>Custom URL
+                        </button>
                     </div>
                 </div>
                 
-                <!-- Account Creation Section -->
-                <div id="account-creation-section" class="mt-8 hidden">
-                    <div class="border-t pt-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-semibold text-gray-800">Create Account</h2>
-                            <button id="back-to-list" class="text-blue-500 hover:text-blue-700">
-                                <i class="fas fa-arrow-left mr-1"></i> Back to List
-                            </button>
-                        </div>
-                        
-                        <div class="bg-gray-50 p-4 rounded-md mb-6">
-                            <h3 class="text-md font-medium text-gray-700 mb-2">Selected Proxy</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <div>
-                                    <span class="text-sm text-gray-500">IP:</span>
-                                    <span id="selected-ip" class="text-sm font-medium ml-1">-</span>
-                                </div>
-                                <div>
-                                    <span class="text-sm text-gray-500">Port:</span>
-                                    <span id="selected-port" class="text-sm font-medium ml-1">-</span>
-                                </div>
-                                <div>
-                                    <span class="text-sm text-gray-500">Country:</span>
-                                    <span id="selected-country" class="text-sm font-medium ml-1">-</span>
-                                </div>
-                                <div>
-                                    <span class="text-sm text-gray-500">Provider:</span>
-                                    <span id="selected-provider" class="text-sm font-medium ml-1">-</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Tabs -->
-                        <div class="flex border-b mb-6">
-                            <button class="protocol-tab py-2 px-4 font-medium text-sm focus:outline-none border-b-2 border-blue-500 text-blue-500" data-target="vmess-form">
-                                <i class="fas fa-shield-alt mr-2"></i>VMess
-                            </button>
-                            <button class="protocol-tab py-2 px-4 font-medium text-sm focus:outline-none border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-target="vless-form">
-                                <i class="fas fa-bolt mr-2"></i>VLESS
-                            </button>
-                            <button class="protocol-tab py-2 px-4 font-medium text-sm focus:outline-none border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-target="trojan-form">
-                                <i class="fas fa-user-secret mr-2"></i>Trojan
-                            </button>
-                            <button class="protocol-tab py-2 px-4 font-medium text-sm focus:outline-none border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-target="ss-form">
-                                <i class="fas fa-mask mr-2"></i>Shadowsocks
-                            </button>
-                        </div>
-                        
-                        <!-- VMess Form -->
-                        <div id="vmess-form" class="protocol-form">
-                            <form id="vmess-account-form" class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="vmess-name" class="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
-                                        <input type="text" id="vmess-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-                                    </div>
-                                    <div>
-                                        <label for="vmess-uuid" class="block text-sm font-medium text-gray-700 mb-1">UUID</label>
-                                        <div class="flex">
-                                            <input type="text" id="vmess-uuid" name="uuid" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="00000000-0000-0000-0000-000000000000" required>
-                                            <button type="button" onclick="generateUUID('vmess-uuid')" class="bg-gray-200 px-3 py-2 border border-gray-300 rounded-r-md hover:bg-gray-300">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="vmess-path" class="block text-sm font-medium text-gray-700 mb-1">Path</label>
-                                        <input type="text" id="vmess-path" name="path" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-                                    </div>
-                                    <div>
-                                        <label for="vmess-network" class="block text-sm font-medium text-gray-700 mb-1">Network</label>
-                                        <select id="vmess-network" name="network" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="ws">WebSocket</option>
-                                            <option value="tcp">TCP</option>
-                                            <option value="grpc">gRPC</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="vmess-security" class="block text-sm font-medium text-gray-700 mb-1">TLS</label>
-                                        <select id="vmess-security" name="security" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="tls">TLS</option>
-                                            <option value="none">None</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="vmess-encryption" class="block text-sm font-medium text-gray-700 mb-1">Encryption</label>
-                                        <select id="vmess-encryption" name="encryption" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="auto">Auto</option>
-                                            <option value="zero">Zero</option>
-                                            <option value="aes-128-gcm">AES-128-GCM</option>
-                                            <option value="chacha20-poly1305">ChaCha20-Poly1305</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="pt-4">
-                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                        Create VMess Account
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <!-- VLESS Form -->
-                        <div id="vless-form" class="protocol-form hidden">
-                            <form id="vless-account-form" class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="vless-name" class="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
-                                        <input type="text" id="vless-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-                                    </div>
-                                    <div>
-                                        <label for="vless-uuid" class="block text-sm font-medium text-gray-700 mb-1">UUID</label>
-                                        <div class="flex">
-                                            <input type="text" id="vless-uuid" name="uuid" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="00000000-0000-0000-0000-000000000000" required>
-                                            <button type="button" onclick="generateUUID('vless-uuid')" class="bg-gray-200 px-3 py-2 border border-gray-300 rounded-r-md hover:bg-gray-300">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="vless-path" class="block text-sm font-medium text-gray-700 mb-1">Path</label>
-                                        <input type="text" id="vless-path" name="path" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-                                    </div>
-                                    <div>
-                                        <label for="vless-network" class="block text-sm font-medium text-gray-700 mb-1">Network</label>
-                                        <select id="vless-network" name="network" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="ws">WebSocket</option>
-                                            <option value="tcp">TCP</option>
-                                            <option value="grpc">gRPC</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="vless-security" class="block text-sm font-medium text-gray-700 mb-1">TLS</label>
-                                        <select id="vless-security" name="security" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="tls">TLS</option>
-                                            <option value="none">None</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="vless-encryption" class="block text-sm font-medium text-gray-700 mb-1">Encryption</label>
-                                        <select id="vless-encryption" name="encryption" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="none">None</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="pt-4">
-                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                        Create VLESS Account
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <!-- Trojan Form -->
-                        <div id="trojan-form" class="protocol-form hidden">
-                            <form id="trojan-account-form" class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="trojan-name" class="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
-                                        <input type="text" id="trojan-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-                                    </div>
-                                    <div>
-                                        <label for="trojan-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                        <div class="flex">
-                                            <input type="text" id="trojan-password" name="password" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Strong password" required>
-                                            <button type="button" onclick="generatePassword('trojan-password')" class="bg-gray-200 px-3 py-2 border border-gray-300 rounded-r-md hover:bg-gray-300">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="trojan-path" class="block text-sm font-medium text-gray-700 mb-1">Path</label>
-                                        <input type="text" id="trojan-path" name="path" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-                                    </div>
-                                    <div>
-                                        <label for="trojan-network" class="block text-sm font-medium text-gray-700 mb-1">Network</label>
-                                        <select id="trojan-network" name="network" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="ws">WebSocket</option>
-                                            <option value="tcp">TCP</option>
-                                            <option value="grpc">gRPC</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="trojan-security" class="block text-sm font-medium text-gray-700 mb-1">TLS</label>
-                                        <select id="trojan-security" name="security" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="tls">TLS</option>
-                                            <option value="none">None</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="trojan-sni" class="block text-sm font-medium text-gray-700 mb-1">SNI (Server Name)</label>
-                                        <input type="text" id="trojan-sni" name="sni" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="mode.t-me-inconigto.workers.dev" readonly>
-                                    </div>
-                                </div>
-                                
-                                <div class="pt-4">
-                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                        Create Trojan Account
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <!-- Shadowsocks Form -->
-                        <div id="ss-form" class="protocol-form hidden">
-                            <form id="ss-account-form" class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="ss-name" class="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
-                                        <input type="text" id="ss-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-                                    </div>
-                                    <div>
-                                        <label for="ss-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                        <div class="flex">
-                                            <input type="text" id="ss-password" name="password" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Strong password" required>
-                                            <button type="button" onclick="generatePassword('ss-password')" class="bg-gray-200 px-3 py-2 border border-gray-300 rounded-r-md hover:bg-gray-300">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="ss-method" class="block text-sm font-medium text-gray-700 mb-1">Encryption Method</label>
-                                        <select id="ss-method" name="method" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="aes-256-gcm">aes-256-gcm</option>
-                                            <option value="aes-128-gcm">aes-128-gcm</option>
-                                            <option value="chacha20-poly1305">chacha20-poly1305</option>
-                                            <option value="2022-blake3-aes-256-gcm">2022-blake3-aes-256-gcm</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="ss-plugin" class="block text-sm font-medium text-gray-700 mb-1">Plugin</label>
-                                        <select id="ss-plugin" name="plugin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="none">None</option>
-                                            <option value="v2ray-plugin">v2ray-plugin</option>
-                                            <option value="obfs-local">Simple-Obfs</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div id="ss-plugin-options" class="hidden">
-                                    <label for="ss-plugin-opts" class="block text-sm font-medium text-gray-700 mb-1">Plugin Options</label>
-                                    <input type="text" id="ss-plugin-opts" name="plugin-opts" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="tls;host=mode.t-me-inconigto.workers.dev;path=/path">
-                                </div>
-                                
-                                <div class="pt-4">
-                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                        Create Shadowsocks Account
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                <div id="custom-url-input" class="mb-6 hidden">
+                    <div class="flex">
+                        <input type="text" id="proxy-url" class="flex-1 px-3 py-2 tech-input rounded-l-md" 
+                            placeholder="Enter custom proxy list URL" 
+                            value="https://raw.githubusercontent.com/InconigtoMode/proxylist/refs/heads/main/all.txt">
+                        <button id="load-custom-url" class="tech-btn px-4 py-2 rounded-r-md">
+                            Load
+                        </button>
                     </div>
                 </div>
                 
-                <!-- Result Section -->
-                <div id="result-section" class="mt-8 hidden">
-                    <div class="border-t pt-6">
+                <div id="loading-indicator" class="text-center py-12 hidden">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-sky-300">Loading proxy list...</p>
+                </div>
+                
+                <div id="proxy-table-container" class="overflow-x-auto rounded-lg">
+                    <table class="min-w-full tech-table">
+                        <thead>
+                            <tr>
+                                <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">IP</th>
+                                <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider">Port</th>
+                                <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider">Country</th>
+                                <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider">Provider</th>
+                                <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proxy-table-body">
+                            <!-- Proxy list will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="no-proxies-message" class="text-center py-12 hidden">
+                    <i class="fas fa-exclamation-circle text-yellow-400 text-4xl mb-3"></i>
+                    <p class="text-gray-400">No proxies found. Please refresh or try a different URL.</p>
+                </div>
+            </div>
+            
+            <!-- Account Creation Section -->
+            <div id="account-creation-section" class="mt-8 hidden">
+                <div class="pt-6">
+                    <div class="tech-divider mb-6"></div>
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-user-plus mr-2 text-sky-400"></i>
+                            <h2 class="text-xl font-semibold">Create Account</h2>
+                        </div>
+                        <button id="back-to-list" class="flex items-center text-sky-400 hover:text-sky-300 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i> Back to List
+                        </button>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 p-5 rounded-lg mb-6 border border-slate-700/50">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-semibold text-gray-800">Account Created Successfully</h2>
-                            <button id="back-to-form" class="text-blue-500 hover:text-blue-700">
-                                <i class="fas fa-arrow-left mr-1"></i> Back to Form
-                            </button>
+                            <h3 class="text-md font-medium text-sky-400">Selected Proxy</h3>
+                            <div id="proxy-check-loading" class="hidden">
+                                <div class="flex items-center">
+                                    <div class="loading-spinner-sm mr-2"></div>
+                                    <span class="text-sm text-gray-400">Checking proxy...</span>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="bg-gray-50 p-4 rounded-md mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="text-md font-medium text-gray-700">Connection URL</h3>
-                                <button id="copy-url" class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
-                                    <i class="far fa-copy mr-1"></i> Copy
+                        <div id="proxy-basic-info" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <span class="text-sm text-gray-400 block mb-1">IP:</span>
+                                <span id="selected-ip" class="text-sm font-medium text-white">-</span>
+                            </div>
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <span class="text-sm text-gray-400 block mb-1">Port:</span>
+                                <span id="selected-port" class="text-sm font-medium text-white">-</span>
+                            </div>
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <span class="text-sm text-gray-400 block mb-1">Country:</span>
+                                <span id="selected-country" class="text-sm font-medium text-white">-</span>
+                            </div>
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <span class="text-sm text-gray-400 block mb-1">Provider:</span>
+                                <span id="selected-provider" class="text-sm font-medium text-white">-</span>
+                            </div>
+                        </div>
+                        
+                        <div id="proxy-details" class="hidden">
+                            <div class="tech-divider my-4 opacity-50"></div>
+                            
+                            <div class="flex flex-wrap gap-4 mb-4">
+                                <div class="bg-slate-900/50 p-3 rounded-lg flex items-center">
+                                    <span class="text-sm text-gray-400 mr-2">Status:</span>
+                                    <span id="proxy-status" class="status-badge">-</span>
+                                </div>
+                                <div class="bg-slate-900/50 p-3 rounded-lg flex items-center">
+                                    <span class="text-sm text-gray-400 mr-2">Latency:</span>
+                                    <span id="proxy-latency" class="latency-badge">-</span>
+                                </div>
+                                <div class="bg-slate-900/50 p-3 rounded-lg flex items-center">
+                                    <span class="text-sm text-gray-400 mr-2">Country:</span>
+                                    <span id="proxy-country" class="text-sm font-medium text-white flex items-center">
+                                        <span id="proxy-flag" class="mr-2">-</span>
+                                        <span id="proxy-country-name">-</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="proxy-detail-grid">
+                                <div class="proxy-detail-card">
+                                    <span class="text-sm text-gray-400 block mb-1">ASN:</span>
+                                    <span id="proxy-asn" class="text-sm font-medium text-white">-</span>
+                                </div>
+                                <div class="proxy-detail-card">
+                                    <span class="text-sm text-gray-400 block mb-1">Organization:</span>
+                                    <span id="proxy-org" class="text-sm font-medium text-white">-</span>
+                                </div>
+                                <div class="proxy-detail-card">
+                                    <span class="text-sm text-gray-400 block mb-1">Colocation:</span>
+                                    <span id="proxy-colo" class="text-sm font-medium text-white">-</span>
+                                </div>
+                                <div class="proxy-detail-card">
+                                    <span class="text-sm text-gray-400 block mb-1">Timezone:</span>
+                                    <span id="proxy-timezone" class="text-sm font-medium text-white">-</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <div class="map-container">
+                                    <div id="map-pin" class="map-pin"></div>
+                                    <div class="absolute bottom-2 right-2 bg-slate-900/80 px-2 py-1 rounded text-xs">
+                                        <span id="proxy-coordinates" class="text-gray-300">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="proxy-error" class="hidden">
+                            <div class="tech-divider my-4 opacity-50"></div>
+                            <div class="bg-red-900/20 border border-red-900/30 p-3 rounded-lg mb-4">
+                                <div class="flex items-center text-red-400">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <span>Could not fetch detailed proxy information. Using basic information only.</span>
+                                </div>
+                            </div>
+                            
+                            <div id="proxy-status-section">
+                                <span class="text-sm text-gray-400">Status:</span>
+                                <span id="direct-proxy-status" class="status-badge status-checking">Checking...</span>
+                                <button id="check-proxy-btn" class="tech-btn-secondary text-xs py-1 px-2 rounded ml-auto">
+                                    <i class="fas fa-sync-alt mr-1"></i> Check Again
                                 </button>
                             </div>
-                            <div id="connection-url" class="text-sm bg-gray-100 p-3 rounded break-all font-mono"></div>
                         </div>
-                        
-                        <div class="bg-gray-50 p-4 rounded-md">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="text-md font-medium text-gray-700">QR Code</h3>
-                                <button id="download-qr" class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
-                                    <i class="fas fa-download mr-1"></i> Download
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <div class="flex border-b border-slate-700 mb-6">
+                        <button class="tech-tab active py-3 px-5 font-medium text-sm focus:outline-none" data-target="vmess-form">
+                            <i class="fas fa-shield-alt mr-2"></i>VMess
+                        </button>
+                        <button class="tech-tab py-3 px-5 font-medium text-sm focus:outline-none" data-target="vless-form">
+                            <i class="fas fa-bolt mr-2"></i>VLESS
+                        </button>
+                        <button class="tech-tab py-3 px-5 font-medium text-sm focus:outline-none" data-target="trojan-form">
+                            <i class="fas fa-user-secret mr-2"></i>Trojan
+                        </button>
+                        <button class="tech-tab py-3 px-5 font-medium text-sm focus:outline-none" data-target="ss-form">
+                            <i class="fas fa-mask mr-2"></i>Shadowsocks
+                        </button>
+                    </div>
+                    
+                    <!-- VMess Form -->
+                    <div id="vmess-form" class="protocol-form">
+                        <form id="vmess-account-form" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="vmess-name" class="block text-sm font-medium text-gray-300 mb-1">Account Name</label>
+                                    <input type="text" id="vmess-name" name="name" class="w-full px-3 py-2 tech-input rounded-md" readonly>
+                                </div>
+                                <div>
+                                    <label for="vmess-uuid" class="block text-sm font-medium text-gray-300 mb-1">UUID</label>
+                                    <div class="flex">
+                                        <input type="text" id="vmess-uuid" name="uuid" class="flex-1 px-3 py-2 tech-input rounded-l-md" value="00000000-0000-0000-0000-000000000000" required>
+                                        <button type="button" onclick="generateUUID('vmess-uuid')" class="tech-btn-secondary px-3 py-2 rounded-r-md hover:bg-slate-700">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="vmess-path" class="block text-sm font-medium text-gray-300 mb-1">Path</label>
+                                    <input type="text" id="vmess-path" name="path" class="w-full px-3 py-2 tech-input rounded-md" readonly>
+                                </div>
+                                <div>
+                                    <label for="vmess-network" class="block text-sm font-medium text-gray-300 mb-1">Network</label>
+                                    <input type="text" id="vmess-network" name="network" class="w-full px-3 py-2 tech-input rounded-md" value="ws" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="vmess-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
+                                    <select id="vmess-security" name="security" class="w-full px-3 py-2 tech-select rounded-md">
+                                        <option value="tls">TLS</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="vmess-encryption" class="block text-sm font-medium text-gray-300 mb-1">Encryption</label>
+                                    <select id="vmess-encryption" name="encryption" class="w-full px-3 py-2 tech-select rounded-md">
+                                        <option value="auto">Auto</option>
+                                        <option value="zero">Zero</option>
+                                        <option value="aes-128-gcm">AES-128-GCM</option>
+                                        <option value="chacha20-poly1305">ChaCha20-Poly1305</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button type="submit" class="w-full tech-btn py-3 px-4 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-plus-circle mr-2"></i> Create VMess Account
                                 </button>
                             </div>
-                            <div class="flex justify-center py-4">
-                                <div id="qrcode" class="bg-white p-2 rounded"></div>
+                        </form>
+                    </div>
+                    
+                    <!-- VLESS Form -->
+                    <div id="vless-form" class="protocol-form hidden">
+                        <form id="vless-account-form" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="vless-name" class="block text-sm font-medium text-gray-300 mb-1">Account Name</label>
+                                    <input type="text" id="vless-name" name="name" class="w-full px-3 py-2 tech-input rounded-md" readonly>
+                                </div>
+                                <div>
+                                    <label for="vless-uuid" class="block text-sm font-medium text-gray-300 mb-1">UUID</label>
+                                    <div class="flex">
+                                        <input type="text" id="vless-uuid" name="uuid" class="flex-1 px-3 py-2 tech-input rounded-l-md" value="00000000-0000-0000-0000-000000000000" required>
+                                        <button type="button" onclick="generateUUID('vless-uuid')" class="tech-btn-secondary px-3 py-2 rounded-r-md hover:bg-slate-700">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="vless-path" class="block text-sm font-medium text-gray-300 mb-1">Path</label>
+                                    <input type="text" id="vless-path" name="path" class="w-full px-3 py-2 tech-input rounded-md" readonly>
+                                </div>
+                                <div>
+                                    <label for="vless-network" class="block text-sm font-medium text-gray-300 mb-1">Network</label>
+                                    <input type="text" id="vless-network" name="network" class="w-full px-3 py-2 tech-input rounded-md" value="ws" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="vless-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
+                                    <select id="vless-security" name="security" class="w-full px-3 py-2 tech-select rounded-md">
+                                        <option value="tls">TLS</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="vless-encryption" class="block text-sm font-medium text-gray-300 mb-1">Encryption</label>
+                                    <select id="vless-encryption" name="encryption" class="w-full px-3 py-2 tech-select rounded-md">
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button type="submit" class="w-full tech-btn py-3 px-4 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-plus-circle mr-2"></i> Create VLESS Account
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Trojan Form -->
+                    <div id="trojan-form" class="protocol-form hidden">
+                        <form id="trojan-account-form" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="trojan-name" class="block text-sm font-medium text-gray-300 mb-1">Account Name</label>
+                                    <input type="text" id="trojan-name" name="name" class="w-full px-3 py-2 tech-input rounded-md" readonly>
+                                </div>
+                                <div>
+                                    <label for="trojan-password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                                    <div class="flex">
+                                        <input type="text" id="trojan-password" name="password" class="flex-1 px-3 py-2 tech-input rounded-l-md" value="00000000-0000-0000-0000-000000000000" required>
+                                        <button type="button" onclick="generatePassword('trojan-password')" class="tech-btn-secondary px-3 py-2 rounded-r-md hover:bg-slate-700">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="trojan-path" class="block text-sm font-medium text-gray-300 mb-1">Path</label>
+                                    <input type="text" id="trojan-path" name="path" class="w-full px-3 py-2 tech-input rounded-md" readonly>
+                                </div>
+                                <div>
+                                    <label for="trojan-network" class="block text-sm font-medium text-gray-300 mb-1">Network</label>
+                                    <input type="text" id="trojan-network" name="network" class="w-full px-3 py-2 tech-input rounded-md" value="ws" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="trojan-security" class="block text-sm font-medium text-gray-300 mb-1">TLS</label>
+                                    <select id="trojan-security" name="security" class="w-full px-3 py-2 tech-select rounded-md">
+                                        <option value="tls">TLS</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="trojan-sni" class="block text-sm font-medium text-gray-300 mb-1">SNI (Server Name)</label>
+                                    <input type="text" id="trojan-sni" name="sni" class="w-full px-3 py-2 tech-input rounded-md" value="mode.t-me-inconigto.workers.dev" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button type="submit" class="w-full tech-btn py-3 px-4 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-plus-circle mr-2"></i> Create Trojan Account
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Shadowsocks Form -->
+                    <div id="ss-form" class="protocol-form hidden">
+                        <form id="ss-account-form" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="ss-name" class="block text-sm font-medium text-gray-300 mb-1">Account Name</label>
+                                    <input type="text" id="ss-name" name="name" class="w-full px-3 py-2 tech-input rounded-md" readonly>
+                                </div>
+                                <div>
+                                    <label for="ss-password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                                    <div class="flex">
+                                        <input type="text" id="ss-password" name="password" class="flex-1 px-3 py-2 tech-input rounded-l-md" value="00000000-0000-0000-0000-000000000000" required>
+                                        <button type="button" onclick="generatePassword('ss-password')" class="tech-btn-secondary px-3 py-2 rounded-r-md hover:bg-slate-700">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="ss-plugin" class="block text-sm font-medium text-gray-300 mb-1">Plugin</label>
+                                <select id="ss-plugin" name="plugin" class="w-full px-3 py-2 tech-select rounded-md">
+                                    <option value="v2ray-plugin">v2ray-plugin</option>
+                                </select>
+                            </div>
+                            
+                            <div id="ss-plugin-options">
+                                <label for="ss-plugin-opts" class="block text-sm font-medium text-gray-300 mb-1">Plugin Options</label>
+                                <input type="text" id="ss-plugin-opts" name="plugin-opts" class="w-full px-3 py-2 tech-input rounded-md" placeholder="tls;host=mode.t-me-inconigto.workers.dev;path=/path">
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button type="submit" class="w-full tech-btn py-3 px-4 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-plus-circle mr-2"></i> Create Shadowsocks Account
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Result Section -->
+            <div id="result-section" class="mt-8 hidden">
+                <div class="pt-6">
+                    <div class="tech-divider mb-6"></div>
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle mr-2 text-green-400"></i>
+                            <h2 class="text-xl font-semibold">Account Created Successfully</h2>
                         </div>
-                        
-                        <div class="mt-6 flex space-x-4">
-                            <button id="create-new" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                Create Another Account
-                            </button>
-                            <button id="back-to-list-from-result" class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                Back to Proxy List
+                        <button id="back-to-form" class="flex items-center text-sky-400 hover:text-sky-300 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i> Back to Form
+                        </button>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 p-5 rounded-lg mb-6 border border-slate-700/50">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-md font-medium text-sky-400">Connection URL</h3>
+                            <button id="copy-url" class="flex items-center text-sky-400 hover:text-sky-300 text-sm transition-colors">
+                                <i class="far fa-copy mr-1"></i> Copy
                             </button>
                         </div>
+                        <div id="connection-url" class="text-sm tech-code p-4 rounded-lg break-all font-mono"></div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 p-5 rounded-lg border border-slate-700/50">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-md font-medium text-sky-400">QR Code</h3>
+                            <button id="download-qr" class="flex items-center text-sky-400 hover:text-sky-300 text-sm transition-colors">
+                                <i class="fas fa-download mr-1"></i> Download
+                            </button>
+                        </div>
+                        <div class="flex justify-center py-6">
+                            <div id="qrcode" class="bg-white p-3 rounded-lg"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 flex space-x-4">
+                        <button id="create-new" class="flex-1 tech-btn py-3 px-4 rounded-md flex items-center justify-center">
+                            <i class="fas fa-plus-circle mr-2"></i> Create Another Account
+                        </button>
+                        <button id="back-to-list-from-result" class="flex-1 tech-btn-secondary py-3 px-4 rounded-md flex items-center justify-center">
+                            <i class="fas fa-list mr-2"></i> Back to Proxy List
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="text-center mt-6 text-slate-500 text-sm">
+        <p>© 2023 Proxy Account Generator | Secure Connection Technology</p>
+    </div>
+</div>
+
+<!-- QR Code Library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+
+<script>
+    // Global variables
+    let proxyList = [];
+    let selectedProxy = null;
+    const defaultProxyUrl = 'https://raw.githubusercontent.com/InconigtoMode/proxylist/refs/heads/main/all.txt';
+    const serverDomain = 'mode.t-me-inconigto.workers.dev';
+    const defaultUUID = '00000000-0000-0000-0000-000000000000';
     
-    <!-- QR Code Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    // DOM elements
+    const proxyListSection = document.getElementById('proxy-list-section');
+    const accountCreationSection = document.getElementById('account-creation-section');
+    const resultSection = document.getElementById('result-section');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const proxyTableBody = document.getElementById('proxy-table-body');
+    const noProxiesMessage = document.getElementById('no-proxies-message');
+    const customUrlInput = document.getElementById('custom-url-input');
+    const proxyUrlInput = document.getElementById('proxy-url');
     
-    <script>
-        // Global variables
-        let proxyList = [];
-        let selectedProxy = null;
-        const defaultProxyUrl = 'https://raw.githubusercontent.com/InconigtoMode/proxylist/refs/heads/main/all.txt';
-        const serverDomain = 'mode.t-me-inconigto.workers.dev';
-        const defaultUUID = '00000000-0000-0000-0000-000000000000';
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Display fallback proxy list immediately to ensure something is visible
+        displayFallbackProxyList();
         
-        // DOM elements
-        const proxyListSection = document.getElementById('proxy-list-section');
-        const accountCreationSection = document.getElementById('account-creation-section');
-        const resultSection = document.getElementById('result-section');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const proxyTableBody = document.getElementById('proxy-table-body');
-        const noProxiesMessage = document.getElementById('no-proxies-message');
-        const customUrlInput = document.getElementById('custom-url-input');
-        const proxyUrlInput = document.getElementById('proxy-url');
+        // Then try to load the actual proxy list
+        loadProxyList(defaultProxyUrl);
         
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load proxy list on page load
+        // Event listeners
+        document.getElementById('refresh-btn').addEventListener('click', function() {
             loadProxyList(defaultProxyUrl);
-            
-            // Event listeners
-            document.getElementById('refresh-btn').addEventListener('click', function() {
-                loadProxyList(defaultProxyUrl);
-            });
-            
-            document.getElementById('custom-url-btn').addEventListener('click', function() {
-                customUrlInput.classList.toggle('hidden');
-            });
-            
-            document.getElementById('load-custom-url').addEventListener('click', function() {
-                const url = proxyUrlInput.value.trim();
-                if (url) {
-                    loadProxyList(url);
-                }
-            });
-            
-            document.getElementById('back-to-list').addEventListener('click', function() {
-                showProxyListSection();
-            });
-            
-            document.getElementById('back-to-form').addEventListener('click', function() {
-                resultSection.classList.add('hidden');
-                accountCreationSection.classList.remove('hidden');
-            });
-            
-            document.getElementById('create-new').addEventListener('click', function() {
-                resultSection.classList.add('hidden');
-                accountCreationSection.classList.remove('hidden');
-            });
-            
-            document.getElementById('back-to-list-from-result').addEventListener('click', function() {
-                showProxyListSection();
-            });
-            
-            // Protocol tabs
-            const protocolTabs = document.querySelectorAll('.protocol-tab');
-            const protocolForms = document.querySelectorAll('.protocol-form');
-            
-            protocolTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active class from all tabs
-                    protocolTabs.forEach(t => {
-                        t.classList.remove('border-blue-500', 'text-blue-500');
-                        t.classList.add('border-transparent', 'text-gray-500');
-                    });
-                    
-                    // Add active class to clicked tab
-                    tab.classList.remove('border-transparent', 'text-gray-500');
-                    tab.classList.add('border-blue-500', 'text-blue-500');
-                    
-                    // Hide all forms
-                    protocolForms.forEach(form => {
-                        form.classList.add('hidden');
-                    });
-                    
-                    // Show the selected form
-                    const targetId = tab.getAttribute('data-target');
-                    document.getElementById(targetId).classList.remove('hidden');
+        });
+        
+        document.getElementById('custom-url-btn').addEventListener('click', function() {
+            customUrlInput.classList.toggle('hidden');
+        });
+        
+        document.getElementById('load-custom-url').addEventListener('click', function() {
+            const url = proxyUrlInput.value.trim();
+            if (url) {
+                loadProxyList(url);
+            }
+        });
+        
+        document.getElementById('back-to-list').addEventListener('click', function() {
+            showProxyListSection();
+        });
+        
+        document.getElementById('back-to-form').addEventListener('click', function() {
+            resultSection.classList.add('hidden');
+            accountCreationSection.classList.remove('hidden');
+        });
+        
+        document.getElementById('create-new').addEventListener('click', function() {
+            resultSection.classList.add('hidden');
+            accountCreationSection.classList.remove('hidden');
+        });
+        
+        document.getElementById('back-to-list-from-result').addEventListener('click', function() {
+            showProxyListSection();
+        });
+        
+        // Check proxy button
+        document.getElementById('check-proxy-btn').addEventListener('click', function() {
+            if (selectedProxy) {
+                checkProxyDirectly(selectedProxy.ip, selectedProxy.port);
+            }
+        });
+        
+        // Protocol tabs
+        const protocolTabs = document.querySelectorAll('.tech-tab');
+        const protocolForms = document.querySelectorAll('.protocol-form');
+        
+        protocolTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                protocolTabs.forEach(t => {
+                    t.classList.remove('active');
                 });
-            });
-            
-            // Show/hide plugin options for Shadowsocks
-            const ssPlugin = document.getElementById('ss-plugin');
-            const ssPluginOptions = document.getElementById('ss-plugin-options');
-            
-            ssPlugin.addEventListener('change', () => {
-                if (ssPlugin.value !== 'none') {
-                    ssPluginOptions.classList.remove('hidden');
-                } else {
-                    ssPluginOptions.classList.add('hidden');
-                }
-            });
-            
-            // Form submissions
-            const forms = [
-                document.getElementById('vmess-account-form'),
-                document.getElementById('vless-account-form'),
-                document.getElementById('trojan-account-form'),
-                document.getElementById('ss-account-form')
-            ];
-            
-            forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    // Get form data
-                    const formData = new FormData(form);
-                    const formType = form.id.split('-')[0]; // vmess, vless, trojan, or ss
-                    
-                    // Generate connection URL based on protocol
-                    let connectionUrl = '';
-                    
-                    if (formType === 'vmess') {
-                        const vmessConfig = {
-                            v: '2',
-                            ps: formData.get('name'),
-                            add: serverDomain,
-                            port: 443,
-                            id: formData.get('uuid'),
-                            aid: '0',
-                            net: formData.get('network'),
-                            type: 'none',
-                            host: serverDomain,
-                            path: formData.get('path'),
-                            tls: formData.get('security') === 'tls' ? 'tls' : '',
-                            sni: serverDomain,
-                            scy: formData.get('encryption')
-                        };
-                        
-                        connectionUrl = 'vmess://' + btoa(JSON.stringify(vmessConfig));
-                    } else if (formType === 'vless') {
-                        const uuid = formData.get('uuid');
-                        const path = encodeURIComponent(formData.get('path'));
-                        const security = formData.get('security');
-                        const encryption = formData.get('encryption');
-                        const network = formData.get('network');
-                        const name = encodeURIComponent(formData.get('name'));
-                        
-                        connectionUrl = `vless://${uuid}@${serverDomain}:443?encryption=${encryption}&security=${security}&type=${network}&host=${serverDomain}&path=${path}#${name}`;
-                    } else if (formType === 'trojan') {
-                        const password = formData.get('password');
-                        const path = encodeURIComponent(formData.get('path'));
-                        const security = formData.get('security');
-                        const network = formData.get('network');
-                        const sni = serverDomain;
-                        const name = encodeURIComponent(formData.get('name'));
-                        
-                        connectionUrl = `trojan://${password}@${serverDomain}:443?security=${security}&type=${network}&host=${serverDomain}&path=${path}&sni=${sni}#${name}`;
-                    } else if (formType === 'ss') {
-                        const password = formData.get('password');
-                        const method = formData.get('method');
-                        const name = encodeURIComponent(formData.get('name'));
-                        const plugin = formData.get('plugin');
-                        const pluginOpts = formData.get('plugin-opts');
-                        
-                        // Base64 encode the method:password part
-                        const userInfo = btoa(`${method}:${password}`);
-                        
-                        if (plugin !== 'none' && pluginOpts) {
-                            connectionUrl = `ss://${userInfo}@${serverDomain}:443?plugin=${encodeURIComponent(plugin + ';' + pluginOpts)}#${name}`;
-                        } else {
-                            connectionUrl = `ss://${userInfo}@${serverDomain}:443#${name}`;
-                        }
-                    }
-                    
-                    // Display the result
-                    document.getElementById('connection-url').textContent = connectionUrl;
-                    
-                    // Generate QR code
-                    const qrcodeElement = document.getElementById('qrcode');
-                    qrcodeElement.innerHTML = '';
-                    QRCode.toCanvas(qrcodeElement, connectionUrl, { width: 200 }, function (error) {
-                        if (error) console.error(error);
-                    });
-                    
-                    // Show result section
-                    accountCreationSection.classList.add('hidden');
-                    resultSection.classList.remove('hidden');
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Hide all forms
+                protocolForms.forEach(form => {
+                    form.classList.add('hidden');
                 });
-            });
-            
-            // Copy URL button
-            document.getElementById('copy-url').addEventListener('click', function() {
-                const connectionUrl = document.getElementById('connection-url').textContent;
-                navigator.clipboard.writeText(connectionUrl).then(() => {
-                    this.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
-                    setTimeout(() => {
-                        this.innerHTML = '<i class="far fa-copy mr-1"></i> Copy';
-                    }, 2000);
-                });
-            });
-            
-            // Download QR code button
-            document.getElementById('download-qr').addEventListener('click', function() {
-                const canvas = document.querySelector('#qrcode canvas');
-                if (canvas) {
-                    const image = canvas.toDataURL('image/png');
-                    const link = document.createElement('a');
-                    link.href = image;
-                    link.download = 'qrcode.png';
-                    link.click();
-                }
+                
+                // Show the selected form
+                const targetId = tab.getAttribute('data-target');
+                document.getElementById(targetId).classList.remove('hidden');
             });
         });
         
-        // Function to load proxy list from URL
-        async function loadProxyList(url) {
-            try {
-                // Show loading indicator
-                loadingIndicator.classList.remove('hidden');
-                proxyTableBody.innerHTML = '';
-                noProxiesMessage.classList.add('hidden');
+        // Form submissions
+        const forms = [
+            document.getElementById('vmess-account-form'),
+            document.getElementById('vless-account-form'),
+            document.getElementById('trojan-account-form'),
+            document.getElementById('ss-account-form')
+        ];
+        
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
                 
-                // Fetch proxy list
+                // Get form data
+                const formData = new FormData(form);
+                const formType = form.id.split('-')[0]; // vmess, vless, trojan, or ss
+                
+                // Generate connection URL based on protocol
+                let connectionUrl = '';
+                
+                if (formType === 'vmess') {
+                    const security = formData.get('security');
+                    // Set port based on TLS setting
+                    const port = security === 'tls' ? 443 : 80;
+                    
+                    const vmessConfig = {
+                        v: '2',
+                        ps: formData.get('name'),
+                        add: serverDomain,
+                        port: port,
+                        id: formData.get('uuid'),
+                        aid: '0',
+                        net: 'ws', // Always WebSocket
+                        type: 'none',
+                        host: serverDomain,
+                        path: formData.get('path'),
+                        tls: security === 'tls' ? 'tls' : '',
+                        sni: serverDomain,
+                        scy: formData.get('encryption')
+                    };
+                    
+                    connectionUrl = 'vmess://' + btoa(JSON.stringify(vmessConfig));
+                } else if (formType === 'vless') {
+                    const uuid = formData.get('uuid');
+                    const path = encodeURIComponent(formData.get('path'));
+                    const security = formData.get('security');
+                    const encryption = formData.get('encryption');
+                    const name = encodeURIComponent(formData.get('name'));
+                    // Set port based on TLS setting
+                    const port = security === 'tls' ? 443 : 80;
+                    
+                    connectionUrl = `vless://${uuid}@${serverDomain}:${port}?encryption=${encryption}&security=${security}&type=ws&host=${serverDomain}&path=${path}#${name}`;
+                } else if (formType === 'trojan') {
+                    const password = formData.get('password');
+                    const path = encodeURIComponent(formData.get('path'));
+                    const security = formData.get('security');
+                    const sni = serverDomain;
+                    const name = encodeURIComponent(formData.get('name'));
+                    // Set port based on TLS setting
+                    const port = security === 'tls' ? 443 : 80;
+                    
+                    connectionUrl = `trojan://${password}@${serverDomain}:${port}?security=${security}&type=ws&host=${serverDomain}&path=${path}&sni=${sni}#${name}`;
+                } else if (formType === 'ss') {
+                    const password = formData.get('password');
+                    const name = encodeURIComponent(formData.get('name'));
+                    const plugin = formData.get('plugin');
+                    const pluginOpts = formData.get('plugin-opts');
+                    
+                    // Use fixed cipher: none for Shadowsocks
+                    const method = "none";
+                    
+                    // Base64 encode the method:password part
+                    const userInfo = btoa(`${method}:${password}`);
+                    
+                    connectionUrl = `ss://${userInfo}@${serverDomain}:443?plugin=${encodeURIComponent(plugin + ';' + pluginOpts)}#${name}`;
+                }
+                
+                // Display the result
+                document.getElementById('connection-url').textContent = connectionUrl;
+                
+                // Generate QR code
+                const qrcodeElement = document.getElementById('qrcode');
+                qrcodeElement.innerHTML = '';
+                QRCode.toCanvas(qrcodeElement, connectionUrl, { width: 200 }, function (error) {
+                    if (error) console.error(error);
+                });
+                
+                // Show result section
+                accountCreationSection.classList.add('hidden');
+                resultSection.classList.remove('hidden');
+            });
+        });
+        
+        // Copy URL button
+        document.getElementById('copy-url').addEventListener('click', function() {
+            const connectionUrl = document.getElementById('connection-url').textContent;
+            navigator.clipboard.writeText(connectionUrl).then(() => {
+                this.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="far fa-copy mr-1"></i> Copy';
+                }, 2000);
+            });
+        });
+        
+        // Download QR code button
+        document.getElementById('download-qr').addEventListener('click', function() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = 'qrcode.png';
+                link.click();
+            }
+        });
+    });
+    
+    // Function to display fallback proxy list
+    function displayFallbackProxyList() {
+        // Add a fallback proxy list for immediate display
+        proxyList = [
+            { ip: '103.6.207.108', port: '8080', country: 'ID', provider: 'PT Pusat Media Indonesia' },
+            { ip: '10.0.0.1', port: '3128', country: 'UK', provider: 'Test Provider 2' },
+            { ip: '172.16.0.1', port: '80', country: 'JP', provider: 'Test Provider 3' }
+        ];
+        
+        // Populate table with fallback data
+        proxyList.forEach((proxy, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="py-3 px-4">${proxy.ip}</td>
+                <td class="py-3 px-4">${proxy.port}</td>
+                <td class="py-3 px-4">${proxy.country}</td>
+                <td class="py-3 px-4">${proxy.provider}</td>
+                <td class="py-3 px-4">
+                    <button class="create-account-btn tech-btn py-1 px-3 rounded text-xs" data-index="${index}">
+                        Create Account
+                    </button>
+                </td>
+            `;
+            proxyTableBody.appendChild(row);
+        });
+        
+        // Add event listeners to create account buttons
+        document.querySelectorAll('.create-account-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-index'));
+                selectProxy(index);
+                showAccountCreationSection();
+            });
+        });
+    }
+    
+    // Function to load proxy list from URL
+    async function loadProxyList(url) {
+        try {
+            // Show loading indicator
+            loadingIndicator.classList.remove('hidden');
+            proxyTableBody.innerHTML = '';
+            noProxiesMessage.classList.add('hidden');
+            
+            // Try with direct fetch first
+            try {
                 const response = await fetch(url);
+                
                 if (!response.ok) {
-                    throw new Error('Failed to fetch proxy list');
+                    throw new Error('Direct fetch failed');
                 }
                 
                 const text = await response.text();
-                const lines = text.trim().split('\n');
+                console.log("Fetched data:", text); // Debug log
                 
-                // Parse proxy list
-                proxyList = lines.map(line => {
-                    const [ip, port, country, provider] = line.split(',');
-                    return { ip, port, country, provider };
-                }).filter(proxy => proxy.ip && proxy.port && proxy.country && proxy.provider);
+                processProxyData(text);
+            } catch (directError) {
+                console.error('Direct fetch failed:', directError);
                 
-                // Populate table
-                if (proxyList.length > 0) {
-                    proxyList.forEach((proxy, index) => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td class="py-2 px-4 border-b border-gray-200">${proxy.ip}</td>
-                            <td class="py-2 px-4 border-b border-gray-200">${proxy.port}</td>
-                            <td class="py-2 px-4 border-b border-gray-200">${proxy.country}</td>
-                            <td class="py-2 px-4 border-b border-gray-200">${proxy.provider}</td>
-                            <td class="py-2 px-4 border-b border-gray-200">
-                                <button class="create-account-btn bg-blue-500 text-white py-1 px-2 rounded text-xs" data-index="${index}">
-                                    Create Account
-                                </button>
-                            </td>
-                        `;
-                        proxyTableBody.appendChild(row);
-                    });
+                // Try with a different CORS proxy if direct fetch fails
+                try {
+                    const jsonpUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                    const response = await fetch(jsonpUrl);
                     
-                    // Add event listeners to create account buttons
-                    document.querySelectorAll('.create-account-btn').forEach(button => {
-                        button.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            selectProxy(index);
-                            showAccountCreationSection();
-                        });
-                    });
-                } else {
-                    noProxiesMessage.classList.remove('hidden');
+                    if (!response.ok) {
+                        throw new Error('CORS proxy fetch failed');
+                    }
+                    
+                    const data = await response.json();
+                    console.log("Fetched data via CORS proxy:", data.contents); // Debug log
+                    
+                    processProxyData(data.contents);
+                } catch (corsError) {
+                    console.error('CORS proxy fetch failed:', corsError);
+                    // Fall back to using the existing fallback proxy list
+                    // which is already displayed
                 }
-            } catch (error) {
-                console.error('Error loading proxy list:', error);
-                noProxiesMessage.classList.remove('hidden');
-            } finally {
-                loadingIndicator.classList.add('hidden');
             }
+        } catch (error) {
+            console.error('Error loading proxy list:', error);
+            // The fallback list is already displayed at this point
+        } finally {
+            loadingIndicator.classList.add('hidden');
+        }
+    }
+    
+    // Process proxy list data
+    function processProxyData(text) {
+        // Handle different line endings
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+        console.log("Parsed lines:", lines); // Debug log
+        
+        if (lines.length === 0) {
+            return; // No data to process
         }
         
-        // Function to select a proxy
-        function selectProxy(index) {
-            selectedProxy = proxyList[index];
-            
-            // Update selected proxy info
-            document.getElementById('selected-ip').textContent = selectedProxy.ip;
-            document.getElementById('selected-port').textContent = selectedProxy.port;
-            document.getElementById('selected-country').textContent = selectedProxy.country;
-            document.getElementById('selected-provider').textContent = selectedProxy.provider;
-            
-            // Update form fields
-            const accountName = `${selectedProxy.country} - ${selectedProxy.provider}`;
-            const path = `/${selectedProxy.ip}-${selectedProxy.port}`;
-            
-            document.getElementById('vmess-name').value = accountName;
-            document.getElementById('vless-name').value = accountName;
-            document.getElementById('trojan-name').value = accountName;
-            document.getElementById('ss-name').value = accountName;
-            
-            document.getElementById('vmess-path').value = path;
-            document.getElementById('vless-path').value = path;
-            document.getElementById('trojan-path').value = path;
-            
-            // Set default UUID
-            document.getElementById('vmess-uuid').value = defaultUUID;
-            document.getElementById('vless-uuid').value = defaultUUID;
-            
-            // Generate passwords
-            generatePassword('trojan-password');
-            generatePassword('ss-password');
-        }
+        // Clear existing proxy list
+        proxyTableBody.innerHTML = '';
         
-        // Function to show proxy list section
-        function showProxyListSection() {
-            proxyListSection.classList.remove('hidden');
-            accountCreationSection.classList.add('hidden');
-            resultSection.classList.add('hidden');
-        }
-        
-        // Function to show account creation section
-        function showAccountCreationSection() {
-            proxyListSection.classList.add('hidden');
-            accountCreationSection.classList.remove('hidden');
-            resultSection.classList.add('hidden');
-        }
-        
-        // Helper functions
-        function generateUUID(elementId) {
-            document.getElementById(elementId).value = defaultUUID;
-        }
-        
-        function generatePassword(elementId) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
-            let password = '';
-            for (let i = 0; i < 16; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
+        // Parse proxy list
+        proxyList = lines.map(line => {
+            const parts = line.split(',');
+            if (parts.length >= 4) {
+                return {
+                    ip: parts[0].trim(),
+                    port: parts[1].trim(),
+                    country: parts[2].trim(),
+                    provider: parts[3].trim()
+                };
             }
-            document.getElementById(elementId).value = password;
+            return null;
+        }).filter(proxy => proxy && proxy.ip && proxy.port && proxy.country && proxy.provider);
+        
+        console.log("Processed proxy list:", proxyList); // Debug log
+        
+        // Populate table
+        if (proxyList.length > 0) {
+            proxyList.forEach((proxy, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-3 px-4">${proxy.ip}</td>
+                    <td class="py-3 px-4">${proxy.port}</td>
+                    <td class="py-3 px-4">${proxy.country}</td>
+                    <td class="py-3 px-4">${proxy.provider}</td>
+                    <td class="py-3 px-4">
+                        <button class="create-account-btn tech-btn py-1 px-3 rounded text-xs" data-index="${index}">
+                            Create Account
+                        </button>
+                    </td>
+                `;
+                proxyTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to create account buttons
+            document.querySelectorAll('.create-account-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    selectProxy(index);
+                    showAccountCreationSection();
+                });
+            });
+        } else {
+            noProxiesMessage.classList.remove('hidden');
         }
-    </script>
+    }
+    
+    // Function to check proxy details from API
+    async function checkProxyDetails(ip, port) {
+        try {
+            document.getElementById('proxy-check-loading').classList.remove('hidden');
+            document.getElementById('proxy-details').classList.add('hidden');
+            document.getElementById('proxy-error').classList.add('hidden');
+            
+            const response = await fetch(`https://proxyip.biz.id/${ip}:${port}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch proxy details');
+            }
+            
+            const data = await response.json();
+            console.log("Proxy details:", data);
+            
+            // Update UI with proxy details
+            document.getElementById('proxy-status').textContent = data.proxyip ? 'Active' : 'Inactive';
+            document.getElementById('proxy-status').className = data.proxyip ? 'status-badge status-active' : 'status-badge status-inactive';
+            
+            document.getElementById('proxy-latency').textContent = data.latency;
+            
+            // Set latency badge color based on speed
+            const latencyValue = parseInt(data.latency);
+            let latencyClass = 'latency-badge ';
+            if (latencyValue < 300) {
+                latencyClass += 'latency-good';
+            } else if (latencyValue < 800) {
+                latencyClass += 'latency-medium';
+            } else {
+                latencyClass += 'latency-poor';
+            }
+            document.getElementById('proxy-latency').className = latencyClass;
+            
+            document.getElementById('proxy-flag').textContent = data.flag;
+            document.getElementById('proxy-country-name').textContent = data.country;
+            document.getElementById('proxy-asn').textContent = data.asn;
+            document.getElementById('proxy-org').textContent = data.org;
+            document.getElementById('proxy-colo').textContent = data.colo;
+            document.getElementById('proxy-timezone').textContent = data.timezone;
+            document.getElementById('proxy-coordinates').textContent = `${data.latitude}, ${data.longitude}`;
+            
+            // Position the map pin based on coordinates
+            // This is a simplified visualization - not a real map
+            const mapPin = document.getElementById('map-pin');
+            const lat = parseFloat(data.latitude);
+            const lon = parseFloat(data.longitude);
+            
+            // Normalize coordinates to fit within the container
+            // Map coordinates roughly to a position in the container
+            // Latitude: -90 (bottom) to 90 (top)
+            // Longitude: -180 (left) to 180 (right)
+            const mapContainer = document.querySelector('.map-container');
+            const containerWidth = mapContainer.offsetWidth;
+            const containerHeight = mapContainer.offsetHeight;
+            
+            const x = ((lon + 180) / 360) * containerWidth;
+            const y = ((90 - lat) / 180) * containerHeight;
+            
+            mapPin.style.left = `${x}px`;
+            mapPin.style.top = `${y}px`;
+            
+            // Show the details section
+            document.getElementById('proxy-details').classList.remove('hidden');
+            
+            return data;
+        } catch (error) {
+            console.error('Error checking proxy details:', error);
+            document.getElementById('proxy-error').classList.remove('hidden');
+            
+            // Try to check proxy directly
+            checkProxyDirectly(ip, port);
+            
+            return null;
+        } finally {
+            document.getElementById('proxy-check-loading').classList.add('hidden');
+        }
+    }
+    
+    // Function to check proxy directly using DOM manipulation
+    function checkProxyDirectly(ip, port) {
+        const statusElement = document.getElementById('direct-proxy-status');
+        statusElement.textContent = 'Checking...';
+        statusElement.className = 'status-badge status-checking';
+        
+        // Create a hidden iframe to test the proxy
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        
+        // Set a timeout for the check
+        const timeout = setTimeout(() => {
+            statusElement.textContent = 'Timeout';
+            statusElement.className = 'status-badge status-inactive';
+            document.body.removeChild(iframe);
+        }, 10000);
+        
+        // Create a unique ID for this check
+        const checkId = 'proxy_check_' + Date.now();
+        
+        // Add a global callback function
+        window[checkId] = function(result) {
+            clearTimeout(timeout);
+            
+            if (result && result.proxyip === true) {
+                statusElement.textContent = 'Active';
+                statusElement.className = 'status-badge status-active';
+            } else {
+                statusElement.textContent = 'Inactive';
+                statusElement.className = 'status-badge status-inactive';
+            }
+            
+            // Clean up
+            document.body.removeChild(iframe);
+            delete window[checkId];
+        };
+        
+        // Set the iframe source to a script that checks the proxy
+        iframe.src = `javascript:
+            (function() {
+                try {
+                    const xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                try {
+                                    const data = JSON.parse(xhr.responseText);
+                                    parent.${checkId}(data);
+                                } catch (e) {
+                                    parent.${checkId}({ proxyip: false });
+                                }
+                            } else {proxyip: false});
+                                }
+                            } else {
+                                parent.${checkId}({proxyip: false});
+                            }
+                        }
+                    };
+                    
+                    xhr.open('GET', 'https://proxyip.biz.id/${ip}:${port}', true);
+                    xhr.timeout = 8000; // 8 second timeout
+                    xhr.ontimeout = function() {
+                        parent.${checkId}({proxyip: false});
+                    };
+                    xhr.onerror = function() {
+                        parent.${checkId}({proxyip: false});
+                    };
+                    xhr.send();
+                } catch(e) {
+                    parent.${checkId}({proxyip: false});
+                }
+            })();
+        `;
+    }
+    
+    // Function to select a proxy
+    async function selectProxy(index) {
+        selectedProxy = proxyList[index];
+        
+        // Update selected proxy info
+        document.getElementById('selected-ip').textContent = selectedProxy.ip;
+        document.getElementById('selected-port').textContent = selectedProxy.port;
+        document.getElementById('selected-country').textContent = selectedProxy.country;
+        document.getElementById('selected-provider').textContent = selectedProxy.provider;
+        
+        // Update form fields
+        const accountName = `${selectedProxy.country} - ${selectedProxy.provider}`;
+        const path = `/${selectedProxy.ip}-${selectedProxy.port}`;
+        
+        document.getElementById('vmess-name').value = accountName;
+        document.getElementById('vless-name').value = accountName;
+        document.getElementById('trojan-name').value = accountName;
+        document.getElementById('ss-name').value = accountName;
+        
+        document.getElementById('vmess-path').value = path;
+        document.getElementById('vless-path').value = path;
+        document.getElementById('trojan-path').value = path;
+        
+        // Set default UUID
+        document.getElementById('vmess-uuid').value = defaultUUID;
+        document.getElementById('vless-uuid').value = defaultUUID;
+        
+        // Set default password (same as UUID)
+        document.getElementById('trojan-password').value = defaultUUID;
+        document.getElementById('ss-password').value = defaultUUID;
+        
+        // Update ss-plugin-opts with the path
+        document.getElementById('ss-plugin-opts').value = `tls;host=${serverDomain};path=${path}`;
+        
+        // Check proxy details from API
+        await checkProxyDetails(selectedProxy.ip, selectedProxy.port);
+    }
+    
+    // Function to show proxy list section
+    function showProxyListSection() {
+        proxyListSection.classList.remove('hidden');
+        accountCreationSection.classList.add('hidden');
+        resultSection.classList.add('hidden');
+    }
+    
+    // Function to show account creation section
+    function showAccountCreationSection() {
+        proxyListSection.classList.add('hidden');
+        accountCreationSection.classList.remove('hidden');
+        resultSection.classList.add('hidden');
+    }
+    
+    // Helper functions
+    function generateUUID(elementId) {
+        document.getElementById(elementId).value = defaultUUID;
+    }
+    
+    function generatePassword(elementId) {
+        // Set password to the default UUID instead of generating a random one
+        document.getElementById(elementId).value = defaultUUID;
+    }
+</script>
 </body>
 </html>
