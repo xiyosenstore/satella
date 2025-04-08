@@ -115,7 +115,7 @@ fn link(_: Request, cx: RouteContext<Config>) -> Result<Response> {
 /// Generates the vmess link
 fn generate_vmess_link(host: &str, uuid: &str) -> String {
     let config = json!({
-        "ps": "siren vmess",
+        "ps": "INCONIGTO VM",
         "v": "2",
         "add": host,
         "port": "80",
@@ -125,7 +125,7 @@ fn generate_vmess_link(host: &str, uuid: &str) -> String {
         "net": "ws",
         "type": "none",
         "host": host,
-        "path": "/KR",
+        "path": "/SG",
         "tls": "",
         "sni": "",
         "alpn": ""
@@ -136,21 +136,21 @@ fn generate_vmess_link(host: &str, uuid: &str) -> String {
 /// Generates the vless link
 fn generate_vless_link(host: &str, uuid: &str) -> String {
     format!(
-        "vless://{uuid}@{host}:443?encryption=none&type=ws&host={host}&path=%2FKR&security=tls&sni={host}#siren vless"
+        "vless://{uuid}@{host}:443?encryption=none&type=ws&host={host}&path=%2FSG&security=tls&sni={host}#INCONIGTO VL"
     )
 }
 
 /// Generates the trojan link
 fn generate_trojan_link(host: &str, uuid: &str) -> String {
     format!(
-        "trojan://{uuid}@{host}:443?encryption=none&type=ws&host={host}&path=%2FKR&security=tls&sni={host}#siren trojan"
+        "trojan://{uuid}@{host}:443?encryption=none&type=ws&host={host}&path=%2FSG&security=tls&sni={host}#INCONIGTO TR"
     )
 }
 
 /// Generates the ss link
 fn generate_ss_link(host: &str, uuid: &str) -> String {
     format!(
-        "ss://{}@{host}:443?plugin=v2ray-plugin%3Btls%3Bmux%3D0%3Bmode%3Dwebsocket%3Bpath%3D%2FKR%3Bhost%3D{host}#siren ss",
+        "ss://{}@{host}:443?plugin=v2ray-plugin%3Btls%3Bmux%3D0%3Bmode%3Dwebsocket%3Bpath%3D%2FSG%3Bhost%3D{host}#INCONIGTO SS",
         URL_SAFE.encode(format!("none:{uuid}"))
     )
 }
