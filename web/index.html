@@ -325,32 +325,6 @@
         font-size: 0.8rem;
     }
     
-    /* Pagination styles */
-    .pagination-btn {
-        min-width: 32px;
-        height: 32px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-    
-    .pagination-btn.active {
-        background-image: var(--tech-gradient);
-        color: white;
-    }
-    
-    .pagination-btn:not(.active):not(.disabled):hover {
-        background-color: rgba(51, 65, 85, 0.5);
-    }
-    
-    .pagination-btn.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    
     @media (max-width: 640px) {
         .tech-tab {
             padding: 0.5rem 0.75rem;
@@ -360,19 +334,6 @@
         .tech-tab i {
             margin-right: 0.25rem;
         }
-        
-        .pagination-btn {
-            min-width: 28px;
-            height: 28px;
-            font-size: 0.75rem;
-        }
-    }
-    
-    /* Search highlight */
-    .highlight {
-        background-color: rgba(14, 165, 233, 0.2);
-        padding: 0 2px;
-        border-radius: 2px;
     }
 </style>
 </head>
@@ -415,20 +376,6 @@
                     </div>
                 </div>
                 
-                <!-- Search input -->
-                <div class="mb-4">
-                    <div class="relative">
-                        <input type="text" id="proxy-search" class="w-full px-3 py-2 pl-9 tech-input rounded-md text-sm" 
-                            placeholder="Search by provider or country...">
-                        <div class="absolute left-3 top-2.5 text-gray-400">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <button id="clear-search" class="absolute right-3 top-2.5 text-gray-400 hidden">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                
                 <div id="loading-indicator" class="text-center py-8 hidden">
                     <div class="loading-spinner mx-auto mb-3"></div>
                     <p class="text-sky-300 text-sm">Loading proxy list...</p>
@@ -442,21 +389,6 @@
                 <div id="no-proxies-message" class="text-center py-8 hidden">
                     <i class="fas fa-exclamation-circle text-yellow-400 text-3xl mb-2"></i>
                     <p class="text-gray-400 text-sm">No proxies found. Please refresh or try a different URL.</p>
-                </div>
-                
-                <div id="no-search-results" class="text-center py-8 hidden">
-                    <i class="fas fa-search text-yellow-400 text-3xl mb-2"></i>
-                    <p class="text-gray-400 text-sm">No matching proxies found. Try a different search term.</p>
-                </div>
-                
-                <!-- Pagination controls -->
-                <div id="pagination-container" class="flex justify-center items-center mt-4 space-x-1">
-                    <!-- Pagination buttons will be added here -->
-                </div>
-                
-                <!-- Proxy count info -->
-                <div id="proxy-count-info" class="text-center mt-3 text-xs text-gray-400">
-                    <!-- Proxy count will be shown here -->
                 </div>
             </div>
             
@@ -642,8 +574,6 @@
                     <div id="trojan-form" class="protocol-form hidden">
                         <form id="trojan-account-form" class="space-y-4">
                             <div>
-                                <label  class="space-y-4">
-                            <div>
                                 <label for="trojan-name" class="block text-sm font-medium text-gray-300 mb-1">Account Name</label>
                                 <input type="text" id="trojan-name" name="name" class="w-full px-3 py-2 tech-input rounded-md text-sm" readonly>
                             </div>
@@ -785,14 +715,10 @@
 <script>
 // Global variables
 let proxyList = [];
-let filteredProxyList = [];
 let selectedProxy = null;
 const defaultProxyUrl = 'https://raw.githubusercontent.com/InconigtoMode/proxylist/refs/heads/main/all.txt';
 const serverDomain = 'mode.t-me-inconigto.workers.dev';
 const defaultUUID = '00000000-0000-0000-0000-000000000000';
-const itemsPerPage = 10;
-let currentPage = 1;
-let searchTerm = '';
 
 // DOM elements
 const proxyListSection = document.getElementById('proxy-list-section');
@@ -801,13 +727,8 @@ const resultSection = document.getElementById('result-section');
 const loadingIndicator = document.getElementById('loading-indicator');
 const proxyListContainer = document.getElementById('proxy-list-container');
 const noProxiesMessage = document.getElementById('no-proxies-message');
-const noSearchResultsMessage = document.getElementById('no-search-results');
 const customUrlInput = document.getElementById('custom-url-input');
 const proxyUrlInput = document.getElementById('proxy-url');
-const paginationContainer = document.getElementById('pagination-container');
-const proxyCountInfo = document.getElementById('proxy-count-info');
-const proxySearchInput = document.getElementById('proxy-search');
-const clearSearchBtn = document.getElementById('clear-search');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
@@ -856,29 +777,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (selectedProxy) {
             checkProxyStatus(selectedProxy.ip, selectedProxy.port);
         }
-    });
-    
-    // Search functionality
-    proxySearchInput.addEventListener('input', function() {
-        searchTerm = this.value.trim().toLowerCase();
-        if (searchTerm) {
-            clearSearchBtn.classList.remove('hidden');
-            filterProxies();
-        } else {
-            clearSearchBtn.classList.add('hidden');
-            filteredProxyList = [...proxyList];
-            currentPage = 1;
-            renderProxyList();
-        }
-    });
-    
-    clearSearchBtn.addEventListener('click', function() {
-        proxySearchInput.value = '';
-        searchTerm = '';
-        clearSearchBtn.classList.add('hidden');
-        filteredProxyList = [...proxyList];
-        currentPage = 1;
-        renderProxyList();
     });
     
     // Protocol tabs
@@ -1023,21 +921,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Function to filter proxies based on search term
-function filterProxies() {
-    if (!searchTerm) {
-        filteredProxyList = [...proxyList];
-    } else {
-        filteredProxyList = proxyList.filter(proxy => 
-            proxy.provider.toLowerCase().includes(searchTerm) || 
-            proxy.country.toLowerCase().includes(searchTerm)
-        );
-    }
-    
-    currentPage = 1;
-    renderProxyList();
-}
-
 // Function to display fallback proxy list
 function displayFallbackProxyList() {
     // Add a fallback proxy list for immediate display
@@ -1047,8 +930,34 @@ function displayFallbackProxyList() {
         { ip: '172.16.0.1', port: '80', country: 'JP', provider: 'Test Provider 3' }
     ];
     
-    filteredProxyList = [...proxyList];
-    renderProxyList();
+    // Populate list with fallback data
+    proxyListContainer.innerHTML = '';
+    
+    proxyList.forEach((proxy, index) => {
+        const card = document.createElement('div');
+        card.className = 'proxy-card';
+        card.innerHTML = `
+            <div class="flex justify-between items-center">
+                <div>
+                    <div class="font-medium text-sm">${proxy.provider}</div>
+                    <div class="text-xs text-gray-400">${proxy.country}</div>
+                </div>
+                <button class="create-account-btn tech-btn py-1 px-2 rounded text-xs" data-index="${index}">
+                    Create Account
+                </button>
+            </div>
+        `;
+        proxyListContainer.appendChild(card);
+    });
+    
+    // Add event listeners to create account buttons
+    document.querySelectorAll('.create-account-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            selectProxy(index);
+            showAccountCreationSection();
+        });
+    });
 }
 
 // Function to load proxy list from URL
@@ -1058,7 +967,6 @@ async function loadProxyList(url) {
         loadingIndicator.classList.remove('hidden');
         proxyListContainer.innerHTML = '';
         noProxiesMessage.classList.add('hidden');
-        noSearchResultsMessage.classList.add('hidden');
         
         // Try with direct fetch first
         try {
@@ -1112,6 +1020,9 @@ function processProxyData(text) {
         return; // No data to process
     }
     
+    // Clear existing proxy list
+    proxyListContainer.innerHTML = '';
+    
     // Parse proxy list
     proxyList = lines.map(line => {
         const parts = line.split(',');
@@ -1128,191 +1039,36 @@ function processProxyData(text) {
     
     console.log("Processed proxy list:", proxyList); // Debug log
     
-    // Reset search and pagination
-    searchTerm = '';
-    proxySearchInput.value = '';
-    clearSearchBtn.classList.add('hidden');
-    currentPage = 1;
-    filteredProxyList = [...proxyList];
-    
-    // Render the proxy list
-    renderProxyList();
-}
-
-// Function to render the proxy list with pagination
-function renderProxyList() {
-    proxyListContainer.innerHTML = '';
-    
-    if (filteredProxyList.length === 0) {
-        if (searchTerm) {
-            noSearchResultsMessage.classList.remove('hidden');
-            noProxiesMessage.classList.add('hidden');
-        } else {
-            noProxiesMessage.classList.remove('hidden');
-            noSearchResultsMessage.classList.add('hidden');
-        }
-        paginationContainer.innerHTML = '';
-        proxyCountInfo.textContent = '';
-        return;
-    }
-    
-    noProxiesMessage.classList.add('hidden');
-    noSearchResultsMessage.classList.add('hidden');
-    
-    // Calculate pagination
-    const totalPages = Math.ceil(filteredProxyList.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, filteredProxyList.length);
-    
-    // Get current page items
-    const currentItems = filteredProxyList.slice(startIndex, endIndex);
-    
-    // Render proxy cards
-    currentItems.forEach((proxy, index) => {
-        const actualIndex = startIndex + index;
-        const card = document.createElement('div');
-        card.className = 'proxy-card';
-        
-        // Highlight search terms if present
-        let providerText = proxy.provider;
-        let countryText = proxy.country;
-        
-        if (searchTerm) {
-            providerText = highlightText(proxy.provider, searchTerm);
-            countryText = highlightText(proxy.country, searchTerm);
-        }
-        
-        card.innerHTML = `
-            <div class="flex justify-between items-center">
-                <div>
-                    <div class="font-medium text-sm">${providerText}</div>
-                    <div class="text-xs text-gray-400">${countryText}</div>
+    // Populate list
+    if (proxyList.length > 0) {
+        proxyList.forEach((proxy, index) => {
+            const card = document.createElement('div');
+            card.className = 'proxy-card';
+            card.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="font-medium text-sm">${proxy.provider}</div>
+                        <div class="text-xs text-gray-400">${proxy.country}</div>
+                    </div>
+                    <button class="create-account-btn tech-btn py-1 px-2 rounded text-xs" data-index="${index}">
+                        Create Account
+                    </button>
                 </div>
-                <button class="create-account-btn tech-btn py-1 px-2 rounded text-xs" data-index="${actualIndex}">
-                    Create Account
-                </button>
-            </div>
-        `;
-        proxyListContainer.appendChild(card);
-    });
-    
-    // Add event listeners to create account buttons
-    document.querySelectorAll('.create-account-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const index = parseInt(this.getAttribute('data-index'));
-            selectProxy(index);
-            showAccountCreationSection();
+            `;
+            proxyListContainer.appendChild(card);
         });
-    });
-    
-    // Render pagination controls
-    renderPagination(totalPages);
-    
-    // Update proxy count info
-    proxyCountInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredProxyList.length} proxies`;
-}
-
-// Function to highlight search terms in text
-function highlightText(text, searchTerm) {
-    if (!searchTerm) return text;
-    
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    return text.replace(regex, '<span class="highlight">$1</span>');
-}
-
-// Function to render pagination controls
-function renderPagination(totalPages) {
-    paginationContainer.innerHTML = '';
-    
-    if (totalPages <= 1) return;
-    
-    // Previous button
-    const prevBtn = document.createElement('button');
-    prevBtn.className = `pagination-btn tech-btn-secondary ${currentPage === 1 ? 'disabled' : ''}`;
-    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderProxyList();
-        }
-    });
-    paginationContainer.appendChild(prevBtn);
-    
-    // Page numbers
-    const maxVisiblePages = window.innerWidth < 640 ? 3 : 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    // Adjust start page if we're near the end
-    if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    // First page button if not visible
-    if (startPage > 1) {
-        const firstPageBtn = document.createElement('button');
-        firstPageBtn.className = 'pagination-btn tech-btn-secondary';
-        firstPageBtn.textContent = '1';
-        firstPageBtn.addEventListener('click', () => {
-            currentPage = 1;
-            renderProxyList();
-        });
-        paginationContainer.appendChild(firstPageBtn);
         
-        // Ellipsis if needed
-        if (startPage > 2) {
-            const ellipsis = document.createElement('span');
-            ellipsis.className = 'px-1 text-gray-400';
-            ellipsis.textContent = '...';
-            paginationContainer.appendChild(ellipsis);
-        }
-    }
-    
-    // Page buttons
-    for (let i = startPage; i <= endPage; i++) {
-        const pageBtn = document.createElement('button');
-        pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : 'tech-btn-secondary'}`;
-        pageBtn.textContent = i.toString();
-        pageBtn.addEventListener('click', () => {
-            currentPage = i;
-            renderProxyList();
+        // Add event listeners to create account buttons
+        document.querySelectorAll('.create-account-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-index'));
+                selectProxy(index);
+                showAccountCreationSection();
+            });
         });
-        paginationContainer.appendChild(pageBtn);
+    } else {
+        noProxiesMessage.classList.remove('hidden');
     }
-    
-    // Last page button if not visible
-    if (endPage < totalPages) {
-        // Ellipsis if needed
-        if (endPage < totalPages - 1) {
-            const ellipsis = document.createElement('span');
-            ellipsis.className = 'px-1 text-gray-400';
-            ellipsis.textContent = '...';
-            paginationContainer.appendChild(ellipsis);
-        }
-        
-        const lastPageBtn = document.createElement('button');
-        lastPageBtn.className = 'pagination-btn tech-btn-secondary';
-        lastPageBtn.textContent = totalPages.toString();
-        lastPageBtn.addEventListener('click', () => {
-            currentPage = totalPages;
-            renderProxyList();
-        });
-        paginationContainer.appendChild(lastPageBtn);
-    }
-    
-    // Next button
-    const nextBtn = document.createElement('button');
-    nextBtn.className = `pagination-btn tech-btn-secondary ${currentPage === totalPages ? 'disabled' : ''}`;
-    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderProxyList();
-        }
-    });
-    paginationContainer.appendChild(nextBtn);
 }
 
 // Function to check proxy status - simplified to only check if active or dead
@@ -1433,7 +1189,7 @@ function updateProxyStatusUI(isActive, latency) {
 
 // Function to select a proxy
 async function selectProxy(index) {
-    selectedProxy = filteredProxyList[index];
+    selectedProxy = proxyList[index];
     
     // Update selected proxy info
     document.getElementById('selected-ip').textContent = selectedProxy.ip;
