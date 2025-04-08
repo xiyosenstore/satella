@@ -113,9 +113,30 @@ fn link(_: Request, cx: RouteContext<Config>) -> Result<Response> {
 }
 
 /// Generates the vmess link
+fn link(_: Request, cx: RouteContext<Config>) -> Result<Response> {
+    // Extract host and uuid from the context
+    let host = cx.data.host.to_string();
+    let uuid = cx.data.uuid.to_string();
+
+    // Generate all the required links using helper functions
+    let vmess_link = generate_vmess_link(&host, &uuid);
+    let vless_link = generate_vless_link(&host, &uuid);
+    let trojan_link = generate_trojan_link(&host, &uuid);
+    let ss_link = generate_ss_link(&host, &uuid);
+
+    // Return the response with the generated links array (without the "links" field)
+    Response::from_json(&[
+        vmess_link, 
+        vless_link, 
+        trojan_link, 
+        ss_link
+    ])
+}
+
+/// Generates the vmess link
 fn generate_vmess_link(host: &str, uuid: &str) -> String {
     let config = json!({
-        "ps": "INCONIGTO VM",
+        "ps": "siren vmess",
         "v": "2",
         "add": host,
         "port": "80",
@@ -125,7 +146,7 @@ fn generate_vmess_link(host: &str, uuid: &str) -> String {
         "net": "ws",
         "type": "none",
         "host": host,
-        "path": "/SG",
+        "path": "/KR",
         "tls": "",
         "sni": "",
         "alpn": ""
@@ -154,3 +175,4 @@ fn generate_ss_link(host: &str, uuid: &str) -> String {
         URL_SAFE.encode(format!("none:{uuid}"))
     )
 }
+
