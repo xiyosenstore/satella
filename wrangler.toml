@@ -4,14 +4,15 @@ compatibility_date = "2024-05-23"
 minify = true
 workers_dev = true
 routes = [
-  { pattern = "mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "ava.game.naver.com.mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "df.game.naver.com.mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "graph.instagram.com.mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "zaintest.vuclip.com.mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "support.zoom.us.mode.inconigto-mode.web.id", custom_domain = true },  
-  { pattern = "cache.netflix.com.mode.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "inconigto-mode.web.id", custom_domain = true },
+  { pattern = "ava.game.naver.com.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "df.game.naver.com.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "graph.instagram.com.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "zaintest.vuclip.com.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "support.zoom.us.inconigto-mode.web.id", custom_domain = true },  
+  { pattern = "cache.netflix.com.inconigto-mode.web.id", custom_domain = true },
 ]
+
 
 [build]
 command = "cargo install -q worker-build && worker-build --release"
