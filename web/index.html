@@ -270,63 +270,38 @@
         background-image: var(--tech-gradient-hover);
     }
     
-    .proxy-detail-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-    
-    .proxy-detail-card {
+    .proxy-status-card {
         background-color: rgba(30, 41, 59, 0.5);
         border-radius: 0.5rem;
         padding: 1rem;
-        transition: all 0.3s ease;
-    }
-    
-    .proxy-detail-card:hover {
-        background-color: rgba(30, 41, 59, 0.8);
-        transform: translateY(-2px);
-    }
-    
-    .map-container {
-        position: relative;
-        overflow: hidden;
-        border-radius: 0.5rem;
-        height: 200px;
-        background-color: rgba(30, 41, 59, 0.5);
-    }
-    
-    .map-pin {
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        background-color: #0ea5e9;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
-    }
-    
-    .map-pin::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 40px;
-        height: 40px;
-        background-color: rgba(14, 165, 233, 0.3);
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        animation: pulse 2s infinite;
-    }
-    
-    #proxy-status-section {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        background-color: rgba(30, 41, 59, 0.5);
-        padding: 0.75rem;
-        border-radius: 0.5rem;
+        gap: 1rem;
         margin-top: 1rem;
+    }
+    
+    .pulse-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    .pulse-dot.active {
+        background-color: #4ade80;
+        box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+    }
+    
+    .pulse-dot.inactive {
+        background-color: #f87171;
+        box-shadow: 0 0 8px rgba(248, 113, 113, 0.8);
+    }
+    
+    .pulse-dot.checking {
+        background-color: #facc15;
+        box-shadow: 0 0 8px rgba(250, 204, 21, 0.8);
     }
 </style>
 </head>
@@ -441,69 +416,21 @@
                             </div>
                         </div>
                         
-                        <div id="proxy-details" class="hidden">
+                        <div id="proxy-status-container" class="mt-4">
                             <div class="tech-divider my-4 opacity-50"></div>
                             
-                            <div class="flex flex-wrap gap-4 mb-4">
-                                <div class="bg-slate-900/50 p-3 rounded-lg flex items-center">
-                                    <span class="text-sm text-gray-400 mr-2">Status:</span>
-                                    <span id="proxy-status" class="status-badge">-</span>
+                            <div class="proxy-status-card">
+                                <div class="flex items-center">
+                                    <span id="status-indicator" class="pulse-dot checking"></span>
+                                    <span id="proxy-status" class="font-medium">Checking status...</span>
                                 </div>
-                                <div class="bg-slate-900/50 p-3 rounded-lg flex items-center">
+                                
+                                <div id="latency-container" class="hidden ml-4">
                                     <span class="text-sm text-gray-400 mr-2">Latency:</span>
-                                    <span id="proxy-latency" class="latency-badge">-</span>
+                                    <span id="proxy-latency" class="latency-badge latency-medium">-</span>
                                 </div>
-                                <div class="bg-slate-900/50 p-3 rounded-lg flex items-center">
-                                    <span class="text-sm text-gray-400 mr-2">Country:</span>
-                                    <span id="proxy-country" class="text-sm font-medium text-white flex items-center">
-                                        <span id="proxy-flag" class="mr-2">-</span>
-                                        <span id="proxy-country-name">-</span>
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div class="proxy-detail-grid">
-                                <div class="proxy-detail-card">
-                                    <span class="text-sm text-gray-400 block mb-1">ASN:</span>
-                                    <span id="proxy-asn" class="text-sm font-medium text-white">-</span>
-                                </div>
-                                <div class="proxy-detail-card">
-                                    <span class="text-sm text-gray-400 block mb-1">Organization:</span>
-                                    <span id="proxy-org" class="text-sm font-medium text-white">-</span>
-                                </div>
-                                <div class="proxy-detail-card">
-                                    <span class="text-sm text-gray-400 block mb-1">Colocation:</span>
-                                    <span id="proxy-colo" class="text-sm font-medium text-white">-</span>
-                                </div>
-                                <div class="proxy-detail-card">
-                                    <span class="text-sm text-gray-400 block mb-1">Timezone:</span>
-                                    <span id="proxy-timezone" class="text-sm font-medium text-white">-</span>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4">
-                                <div class="map-container">
-                                    <div id="map-pin" class="map-pin"></div>
-                                    <div class="absolute bottom-2 right-2 bg-slate-900/80 px-2 py-1 rounded text-xs">
-                                        <span id="proxy-coordinates" class="text-gray-300">-</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="proxy-error" class="hidden">
-                            <div class="tech-divider my-4 opacity-50"></div>
-                            <div class="bg-red-900/20 border border-red-900/30 p-3 rounded-lg mb-4">
-                                <div class="flex items-center text-red-400">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    <span>Could not fetch detailed proxy information. Using basic information only.</span>
-                                </div>
-                            </div>
-                            
-                            <div id="proxy-status-section">
-                                <span class="text-sm text-gray-400">Status:</span>
-                                <span id="direct-proxy-status" class="status-badge status-checking">Checking...</span>
-                                <button id="check-proxy-btn" class="tech-btn-secondary text-xs py-1 px-2 rounded ml-auto">
+                                
+                                <button id="check-proxy-btn" class="tech-btn-secondary py-1 px-3 rounded text-xs ml-auto">
                                     <i class="fas fa-sync-alt mr-1"></i> Check Again
                                 </button>
                             </div>
@@ -849,7 +776,7 @@
         // Check proxy button
         document.getElementById('check-proxy-btn').addEventListener('click', function() {
             if (selectedProxy) {
-                checkProxyDirectly(selectedProxy.ip, selectedProxy.port);
+                checkProxyStatus(selectedProxy.ip, selectedProxy.port);
             }
         });
         
@@ -1140,159 +1067,150 @@
         }
     }
     
-    // Function to check proxy details from API
-    async function checkProxyDetails(ip, port) {
+    // Function to check proxy status
+    async function checkProxyStatus(ip, port) {
+        // Update UI to show checking state
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('proxy-status');
+        const latencyContainer = document.getElementById('latency-container');
+        
+        statusIndicator.className = 'pulse-dot checking';
+        statusText.textContent = 'Checking status...';
+        latencyContainer.classList.add('hidden');
+        
+        document.getElementById('proxy-check-loading').classList.remove('hidden');
+        
         try {
-            document.getElementById('proxy-check-loading').classList.remove('hidden');
-            document.getElementById('proxy-details').classList.add('hidden');
-            document.getElementById('proxy-error').classList.add('hidden');
+            // Create a unique ID for this check to avoid conflicts
+            const checkId = 'proxy_check_' + Date.now();
             
-            const response = await fetch(`https://proxyip.biz.id/${ip}:${port}`);
+            // Create an iframe to handle the check
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
             
-            if (!response.ok) {
-                throw new Error('Failed to fetch proxy details');
-            }
+            // Set a timeout for the check
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Timeout')), 10000);
+            });
             
-            const data = await response.json();
-            console.log("Proxy details:", data);
+            // Create a promise that will be resolved by the callback
+            const checkPromise = new Promise((resolve) => {
+                // Add a global callback function
+                window[checkId] = function(result) {
+                    resolve(result);
+                    // Clean up
+                    delete window[checkId];
+                };
+                
+                // Start time for latency calculation
+                const startTime = Date.now();
+                
+                // Set the iframe source to a script that checks the proxy
+                iframe.src = `javascript:
+                    (function() {
+                        try {
+                            const startTime = ${startTime};
+                            const xhr = new XMLHttpRequest();
+                            xhr.onreadystatechange = function() {
+                                if (xhr.readyState === 4) {
+                                    const latency = Date.now() - startTime;
+                                    if (xhr.status === 200) {
+                                        try {
+                                            const data = JSON.parse(xhr.responseText);
+                                            parent.${checkId}({
+                                                success: true,
+                                                active: data.proxyip === true,
+                                                latency: latency
+                                            });
+                                        } catch (e) {
+                                            parent.${checkId}({
+                                                success: false,
+                                                active: false,
+                                                latency: latency
+                                            });
+                                        }
+                                    } else {
+                                        parent.${checkId}({
+                                            success: false,
+                                            active: false,
+                                            latency: latency
+                                        });
+                                    }
+                                }
+                            };
+                            
+                            xhr.open('GET', 'https://proxyip.biz.id/${ip}:${port}', true);
+                            xhr.timeout = 8000; // 8 second timeout
+                            xhr.ontimeout = function() {
+                                parent.${checkId}({
+                                    success: false,
+                                    active: false,
+                                    latency: 8000
+                                });
+                            };
+                            xhr.onerror = function() {
+                                parent.${checkId}({
+                                    success: false,
+                                    active: false,
+                                    latency: Date.now() - startTime
+                                });
+                            };
+                            xhr.send();
+                        } catch(e) {
+                            parent.${checkId}({
+                                success: false,
+                                active: false,
+                                latency: 0
+                            });
+                        }
+                    })();
+                `;
+            });
             
-            // Update UI with proxy details
-            document.getElementById('proxy-status').textContent = data.proxyip ? 'Active' : 'Inactive';
-            document.getElementById('proxy-status').className = data.proxyip ? 'status-badge status-active' : 'status-badge status-inactive';
+            // Race the check against the timeout
+            const result = await Promise.race([checkPromise, timeoutPromise]);
             
-            document.getElementById('proxy-latency').textContent = data.latency;
-            
-            // Set latency badge color based on speed
-            const latencyValue = parseInt(data.latency);
-            let latencyClass = 'latency-badge ';
-            if (latencyValue < 300) {
-                latencyClass += 'latency-good';
-            } else if (latencyValue < 800) {
-                latencyClass += 'latency-medium';
+            // Update UI based on result
+            if (result.success && result.active) {
+                statusIndicator.className = 'pulse-dot active';
+                statusText.textContent = 'Active';
+                
+                // Show latency if available
+                if (result.latency) {
+                    const latencyElement = document.getElementById('proxy-latency');
+                    latencyElement.textContent = result.latency + 'ms';
+                    
+                    // Set latency badge color based on speed
+                    let latencyClass = 'latency-badge ';
+                    if (result.latency < 300) {
+                        latencyClass += 'latency-good';
+                    } else if (result.latency < 800) {
+                        latencyClass += 'latency-medium';
+                    } else {
+                        latencyClass += 'latency-poor';
+                    }
+                    latencyElement.className = latencyClass;
+                    
+                    latencyContainer.classList.remove('hidden');
+                }
             } else {
-                latencyClass += 'latency-poor';
-            }
-            document.getElementById('proxy-latency').className = latencyClass;
-            
-            document.getElementById('proxy-flag').textContent = data.flag;
-            document.getElementById('proxy-country-name').textContent = data.country;
-            document.getElementById('proxy-asn').textContent = data.asn;
-            document.getElementById('proxy-org').textContent = data.org;
-            document.getElementById('proxy-colo').textContent = data.colo;
-            document.getElementById('proxy-timezone').textContent = data.timezone;
-            document.getElementById('proxy-coordinates').textContent = `${data.latitude}, ${data.longitude}`;
-            
-            // Position the map pin based on coordinates
-            // This is a simplified visualization - not a real map
-            const mapPin = document.getElementById('map-pin');
-            const lat = parseFloat(data.latitude);
-            const lon = parseFloat(data.longitude);
-            
-            // Normalize coordinates to fit within the container
-            // Map coordinates roughly to a position in the container
-            // Latitude: -90 (bottom) to 90 (top)
-            // Longitude: -180 (left) to 180 (right)
-            const mapContainer = document.querySelector('.map-container');
-            const containerWidth = mapContainer.offsetWidth;
-            const containerHeight = mapContainer.offsetHeight;
-            
-            const x = ((lon + 180) / 360) * containerWidth;
-            const y = ((90 - lat) / 180) * containerHeight;
-            
-            mapPin.style.left = `${x}px`;
-            mapPin.style.top = `${y}px`;
-            
-            // Show the details section
-            document.getElementById('proxy-details').classList.remove('hidden');
-            
-            return data;
-        } catch (error) {
-            console.error('Error checking proxy details:', error);
-            document.getElementById('proxy-error').classList.remove('hidden');
-            
-            // Try to check proxy directly
-            checkProxyDirectly(ip, port);
-            
-            return null;
-        } finally {
-            document.getElementById('proxy-check-loading').classList.add('hidden');
-        }
-    }
-    
-    // Function to check proxy directly using DOM manipulation
-    function checkProxyDirectly(ip, port) {
-        const statusElement = document.getElementById('direct-proxy-status');
-        statusElement.textContent = 'Checking...';
-        statusElement.className = 'status-badge status-checking';
-        
-        // Create a hidden iframe to test the proxy
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-        
-        // Set a timeout for the check
-        const timeout = setTimeout(() => {
-            statusElement.textContent = 'Timeout';
-            statusElement.className = 'status-badge status-inactive';
-            document.body.removeChild(iframe);
-        }, 10000);
-        
-        // Create a unique ID for this check
-        const checkId = 'proxy_check_' + Date.now();
-        
-        // Add a global callback function
-        window[checkId] = function(result) {
-            clearTimeout(timeout);
-            
-            if (result && result.proxyip === true) {
-                statusElement.textContent = 'Active';
-                statusElement.className = 'status-badge status-active';
-            } else {
-                statusElement.textContent = 'Inactive';
-                statusElement.className = 'status-badge status-inactive';
+                statusIndicator.className = 'pulse-dot inactive';
+                statusText.textContent = 'Dead';
+                latencyContainer.classList.add('hidden');
             }
             
             // Clean up
             document.body.removeChild(iframe);
-            delete window[checkId];
-        };
-        
-        // Set the iframe source to a script that checks the proxy
-        iframe.src = `javascript:
-            (function() {
-                try {
-                    const xhr = new XMLHttpRequest();
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState === 4) {
-                            if (xhr.status === 200) {
-                                try {
-                                    const data = JSON.parse(xhr.responseText);
-                                    parent.${checkId}(data);
-                                } catch (e) {
-                                    parent.${checkId}({ proxyip: false });
-                                }
-                            } else {proxyip: false});
-                                }
-                            } else {
-                                parent.${checkId}({proxyip: false});
-                            }
-                        }
-                    };
-                    
-                    xhr.open('GET', 'https://proxyip.biz.id/${ip}:${port}', true);
-                    xhr.timeout = 8000; // 8 second timeout
-                    xhr.ontimeout = function() {
-                        parent.${checkId}({proxyip: false});
-                    };
-                    xhr.onerror = function() {
-                        parent.${checkId}({proxyip: false});
-                    };
-                    xhr.send();
-                } catch(e) {
-                    parent.${checkId}({proxyip: false});
-                }
-            })();
-        `;
+            
+        } catch (error) {
+            console.error('Error checking proxy:', error);
+            statusIndicator.className = 'pulse-dot inactive';
+            statusText.textContent = 'Dead';
+            latencyContainer.classList.add('hidden');
+        } finally {
+            document.getElementById('proxy-check-loading').classList.add('hidden');
+        }
     }
     
     // Function to select a proxy
@@ -1329,8 +1247,8 @@
         // Update ss-plugin-opts with the path
         document.getElementById('ss-plugin-opts').value = `tls;host=${serverDomain};path=${path}`;
         
-        // Check proxy details from API
-        await checkProxyDetails(selectedProxy.ip, selectedProxy.port);
+        // Check proxy status
+        checkProxyStatus(selectedProxy.ip, selectedProxy.port);
     }
     
     // Function to show proxy list section
