@@ -2,6 +2,16 @@ name = "mode"
 main = "build/worker/shim.mjs"
 compatibility_date = "2024-05-23"
 minify = true
+workers_dev = true
+routes = [
+  { pattern = "mode.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "ava.game.naver.com.mode.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "df.game.naver.com.mode.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "graph.instagram.com.mode.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "zaintest.vuclip.com.mode.inconigto-mode.web.id", custom_domain = true },
+  { pattern = "support.zoom.us.mode.inconigto-mode.web.id", custom_domain = true },  
+  { pattern = "cache.netflix.com.mode.inconigto-mode.web.id", custom_domain = true },
+]
 
 [build]
 command = "cargo install -q worker-build && worker-build --release"
@@ -13,12 +23,5 @@ build = { command = "cargo install -q worker-build && worker-build --dev" }
 UUID = "00000000-0000-0000-0000-000000000000"
 MAIN_PAGE_URL = "https://raw.githubusercontent.com/InconigtoMode/inconigto-vpn/refs/heads/master/web/index.html"
 SUB_PAGE_URL = "https://raw.githubusercontent.com/InconigtoMode/inconigto-vpn/refs/heads/master/web/sub.html"
-routes = [
-  { pattern = "mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "ava.game.naver.com.mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "df.game.naver.com.mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "graph.instagram.com.mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "zaintest.vuclip.com.mode.inconigto-mode.web.id", custom_domain = true },
-  { pattern = "support.zoom.us.mode.inconigto-mode.web.id", custom_domain = true },  
-  { pattern = "cache.netflix.com.mode.inconigto-mode.web.id", custom_domain = true },
-]
+
+
