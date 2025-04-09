@@ -1,31 +1,45 @@
 # Siren
 
-an Indonesia serverless v2ray tunnel
+An Indonesian serverless V2Ray tunnel solution designed for simplicity and efficiency.
 
 ## Features
 
-- [x] Protocol support:
-  - [x] Vmess
-  - [x] Trojan
-  - [x] VLESS
-  - [x] Shadowsocks
-- [x] Domain over https
+- **Protocol Support:**
+  - [x] **Vmess**
+  - [x] **Trojan**
+  - [x] **VLESS**
+  - [x] **Shadowsocks** 
+- **Domain over HTTPS** – Ensuring encrypted and safe communication.
 
 ## Endpoints
 
-- / > Main page
-- /link > Proxy link
-- /sub > Subscription page
+- **`/`** 
+- **`/link`**
+- **`/sub`**
 
-## Deploy
+## Deployment
 
-### CI (Github Actions)
+### CI Deployment with GitHub Actions
 
-1. [Create an API token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/) from the cloudflare dashboard.
-2. Create a `Repository Secret` called `CLOUDFLARE_API_TOKEN` and paste API Token from the first steps.
-3. Open `Actions` tab and enable workflows
-4. Push a commit or run the workflow manually
-5. Access `https://YOUR-WORKERS-SUBDOMAIN.workers.dev`
+Follow these steps to deploy Siren using **GitHub Actions** and Cloudflare Workers:
 
-### Credit 
-[Source](https://github.com/FoolVPN-ID/)
+1. **Create an API Token:**  
+   Head to [Cloudflare API Token Creation](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/) and generate an API token.
+
+2. **Store the API Token:**  
+   In your GitHub repository, create a **Repository Secret** named `CLOUDFLARE_API_TOKEN` and paste the token you generated in the previous step.
+
+3. **Enable Workflows:**  
+   Go to the **Actions** tab in your GitHub repository and enable workflows.
+
+4. **Deploy:**  
+   Push a commit or manually trigger the workflow to start the deployment process.
+
+5. **Access Your Deployment:**  
+   Once the workflow completes, you can access your deployed service at:  
+   `https://YOUR-WORKERS-SUBDOMAIN.workers.dev`
+
+## Credits
+
+This project is based on [FoolVPN-ID](https://github.com/FoolVPN-ID/).
+
