@@ -207,6 +207,18 @@
         animation: spin 1s linear infinite;
     }
     
+    .loading-spinner-xs {
+        border: 1px solid rgba(51, 65, 85, 0.3);
+        border-top: 1px solid var(--primary);
+        border-radius: 50%;
+        width: 12px;
+        height: 12px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 4px;
+    }
+    
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
@@ -323,6 +335,37 @@
     /* Icon styles */
     .icon-glow {
         filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.5));
+    }
+    
+    /* Status badge styles */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.7rem;
+        padding: 0.15rem 0.4rem;
+        border-radius: 9999px;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+    }
+    
+    .status-badge.loading {
+        background-color: rgba(99, 102, 241, 0.2);
+        color: #818cf8;
+    }
+    
+    .status-badge.active {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+    }
+    
+    .status-badge.dead {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+    
+    .status-badge.unknown {
+        background-color: rgba(245, 158, 11, 0.2);
+        color: #fbbf24;
     }
     
     /* Responsive adjustments */
@@ -455,6 +498,14 @@
                             <div class="info-card">
                                 <span class="text-xs text-gray-400 block mb-1">Port:</span>
                                 <span id="selected-port" class="text-sm font-medium text-white">-</span>
+                            </div>
+                        </div>
+                        <div id="proxy-status-container" class="mt-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hidden">
+                            <div class="flex items-center justify-center">
+                                <div id="proxy-status" class="text-center">
+                                    <div class="loading-spinner-sm mx-auto mb-2"></div>
+                                    <span class="text-sm text-indigo-300">Checking proxy status...</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -699,6 +750,7 @@ const serverDomain = 'inconigto-mode.web.id';
 const defaultUUID = '00000000-0000-0000-0000-000000000000';
 const itemsPerPage = 10;
 let currentPage = 1;
+const cacheExpirationTime = 30 * 60 * 1000; // 30 minutes in milliseconds
 
 // DOM elements
 const proxyListSection = document.getElementById('proxy-list-section');
@@ -715,6 +767,9 @@ const searchInput = document.getElementById('search-input');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if there's a proxy in the URL
+    checkUrlForProxy();
+    
     // Display fallback proxy list immediately to ensure something is visible
     displayFallbackProxyList();
     
@@ -723,6 +778,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Event listeners
     document.getElementById('refresh-btn').addEventListener('click', function() {
+        // Clear cache when manually refreshing
+        clearProxyStatusCache();
         loadProxyList(defaultProxyUrl);
     });
     
@@ -739,6 +796,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('back-to-list').addEventListener('click', function() {
         showProxyListSection();
+        // Update URL to remove proxy
+        updateUrlWithoutReload('');
     });
     
     document.getElementById('back-to-form').addEventListener('click', function() {
@@ -753,6 +812,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('back-to-list-from-result').addEventListener('click', function() {
         showProxyListSection();
+        // Update URL to remove proxy
+        updateUrlWithoutReload('');
     });
     
     // Search functionality
@@ -864,14 +925,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const path = encodeURIComponent(formData.get('path'));
                 const security = formData.get('security');
                 
+                // Set port based on TLS setting
+                const port = security === 'tls' ? 443 : 80;
+                
                 // Use fixed cipher: none for Shadowsocks
                 const method = "none";
                 
                 // Base64 encode the method:password part
                 const userInfo = btoa(`${method}:${password}`);
                 
-                // Create the new format SS URL
-                connectionUrl = `ss://${userInfo}@${serverDomain}:443?encryption=none&type=ws&host=${serverDomain}&path=${path}&security=${security}&sni=${serverDomain}#${name}`;
+                // Create the new format SS URL with dynamic port
+                connectionUrl = `ss://${userInfo}@${serverDomain}:${port}?encryption=none&type=ws&host=${serverDomain}&path=${path}&security=${security}&sni=${serverDomain}#${name}`;
             }
             
             // Display the result
@@ -902,6 +966,38 @@ document.addEventListener('DOMContentLoaded', function() {
         downloadQRCode();
     });
 });
+
+// Function to check if there's a proxy in the URL
+function checkUrlForProxy() {
+    const path = window.location.pathname;
+    if (path && path !== '/') {
+        // Remove leading slash
+        const proxyString = path.substring(1);
+        
+        // Check if it's in IP:PORT format
+        if (/^[\d\.]+:\d+$/.test(proxyString)) {
+            const [ip, port] = proxyString.split(':');
+            
+            // Create a temporary proxy object
+            const tempProxy = {
+                ip: ip,
+                port: port,
+                country: 'Unknown',
+                provider: 'Custom Proxy'
+            };
+            
+            // Select this proxy
+            selectProxy(-1, tempProxy);
+            showAccountCreationSection();
+        }
+    }
+}
+
+// Function to update URL without page reload
+function updateUrlWithoutReload(proxyString) {
+    const newUrl = window.location.origin + (proxyString ? '/' + proxyString : '');
+    window.history.pushState({ path: newUrl }, '', newUrl);
+}
 
 // Improved QR code generation with multiple fallback methods
 function generateQRCode(text) {
@@ -1142,18 +1238,56 @@ function renderProxyList() {
         const actualIndex = startIndex + index;
         const card = document.createElement('div');
         card.className = 'proxy-card';
-        card.innerHTML = `
-            <div class="flex justify-between items-center">
-                <div>
-                    <div class="font-medium text-sm">${proxy.provider}</div>
-                    <div class="text-xs text-gray-400 mt-1">${proxy.country} | ${proxy.ip}:${proxy.port}</div>
-                </div>
-                <button class="create-account-btn primary-btn py-2 px-4 rounded-lg text-xs" data-index="${actualIndex}">
-                    Create Account
-                </button>
-            </div>
-        `;
+        
+        // Create the main content of the card
+        const cardContent = document.createElement('div');
+        cardContent.className = 'flex justify-between items-center';
+        
+        // Left side with proxy info
+        const infoDiv = document.createElement('div');
+        
+        // Provider and status badge container
+        const providerContainer = document.createElement('div');
+        providerContainer.className = 'flex items-center';
+        
+        // Provider name
+        const providerName = document.createElement('div');
+        providerName.className = 'font-medium text-sm';
+        providerName.textContent = proxy.provider;
+        providerContainer.appendChild(providerName);
+        
+        // Status badge (initially loading)
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'status-badge loading ml-2';
+        statusBadge.innerHTML = '<div class="loading-spinner-xs"></div> Checking...';
+        statusBadge.id = `proxy-status-${actualIndex}`;
+        providerContainer.appendChild(statusBadge);
+        
+        infoDiv.appendChild(providerContainer);
+        
+        // Country and IP:Port info
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'text-xs text-gray-400 mt-1';
+        detailsDiv.textContent = `${proxy.country} | ${proxy.ip}:${proxy.port}`;
+        infoDiv.appendChild(detailsDiv);
+        
+        // Right side with button
+        const buttonDiv = document.createElement('div');
+        const button = document.createElement('button');
+        button.className = 'create-account-btn primary-btn py-2 px-4 rounded-lg text-xs';
+        button.setAttribute('data-index', actualIndex);
+        button.innerHTML = 'Create Account';
+        buttonDiv.appendChild(button);
+        
+        // Assemble the card
+        cardContent.appendChild(infoDiv);
+        cardContent.appendChild(buttonDiv);
+        card.appendChild(cardContent);
+        
         proxyListContainer.appendChild(card);
+        
+        // Check proxy status for this card with caching
+        checkProxyStatusInList(proxy, statusBadge);
     });
     
     // Add event listeners to create account buttons
@@ -1170,6 +1304,118 @@ function renderProxyList() {
     
     // Update proxy count info
     proxyCountInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredProxyList.length} proxies`;
+}
+
+// Cache management functions
+function getProxyStatusFromCache(proxy) {
+    try {
+        const cacheKey = `proxy_status_${proxy.ip}_${proxy.port}`;
+        const cachedData = localStorage.getItem(cacheKey);
+        
+        if (cachedData) {
+            const data = JSON.parse(cachedData);
+            
+            // Check if cache is still valid
+            if (Date.now() - data.timestamp < cacheExpirationTime) {
+                console.log(`Using cached status for ${proxy.ip}:${proxy.port}`);
+                return data.status;
+            } else {
+                // Cache expired
+                localStorage.removeItem(cacheKey);
+            }
+        }
+    } catch (error) {
+        console.error("Error reading from cache:", error);
+    }
+    
+    return null;
+}
+
+function saveProxyStatusToCache(proxy, status) {
+    try {
+        const cacheKey = `proxy_status_${proxy.ip}_${proxy.port}`;
+        const data = {
+            status: status,
+            timestamp: Date.now()
+        };
+        
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        console.log(`Cached status for ${proxy.ip}:${proxy.port}`);
+    } catch (error) {
+        console.error("Error saving to cache:", error);
+    }
+}
+
+function clearProxyStatusCache() {
+    try {
+        // Clear only proxy status items
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('proxy_status_')) {
+                keysToRemove.push(key);
+            }
+        }
+        
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        console.log(`Cleared ${keysToRemove.length} proxy status cache items`);
+    } catch (error) {
+        console.error("Error clearing cache:", error);
+    }
+}
+
+// Function to check proxy status in the list with caching
+function checkProxyStatusInList(proxy, statusBadge) {
+    // First check if we have a valid cached result
+    const cachedStatus = getProxyStatusFromCache(proxy);
+    
+    if (cachedStatus) {
+        // Use cached result
+        updateStatusBadge(statusBadge, cachedStatus);
+        return;
+    }
+    
+    // If no cache, check status from API
+    const statusURL = `https://api.ndeso.xyz/proxy?ip=${proxy.ip}&port=${proxy.port}`;
+    
+    fetch(statusURL)
+        .then(response => response.json())
+        .then(data => {
+            let status;
+            if (data.proxyip === true) {
+                status = 'active';
+            } else {
+                status = 'dead';
+            }
+            
+            // Update the badge
+            updateStatusBadge(statusBadge, status);
+            
+            // Save to cache
+            saveProxyStatusToCache(proxy, status);
+        })
+        .catch(error => {
+            // Update badge to unknown
+            updateStatusBadge(statusBadge, 'unknown');
+            console.error("Fetch error:", error);
+        });
+}
+
+// Function to update status badge based on status
+function updateStatusBadge(statusBadge, status) {
+    if (status === 'active') {
+        statusBadge.className = 'status-badge active';
+        statusBadge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Active';
+    } else if (status === 'dead') {
+        statusBadge.className = 'status-badge dead';
+        statusBadge.innerHTML = '<i class="fas fa-times-circle mr-1"></i>Dead';
+    } else {
+        statusBadge.className = 'status-badge unknown';
+        statusBadge.innerHTML = '<i class="fas fa-question-circle mr-1"></i>Unknown';
+    }
 }
 
 // Function to render pagination controls
@@ -1268,8 +1514,14 @@ function renderPagination(totalPages) {
 }
 
 // Function to select a proxy
-async function selectProxy(index) {
-    selectedProxy = filteredProxyList[index];
+function selectProxy(index, customProxy = null) {
+    // If customProxy is provided, use it instead of getting from filteredProxyList
+    selectedProxy = customProxy || filteredProxyList[index];
+    
+    // Update URL with the selected proxy
+    if (selectedProxy) {
+        updateUrlWithoutReload(`${selectedProxy.ip}:${selectedProxy.port}`);
+    }
     
     // Update selected proxy info
     document.getElementById('selected-ip').textContent = selectedProxy.ip;
@@ -1298,6 +1550,94 @@ async function selectProxy(index) {
     // Set default password (same as UUID)
     document.getElementById('trojan-password').value = defaultUUID;
     document.getElementById('ss-password').value = defaultUUID;
+    
+    // Check proxy status in the account creation section
+    const statusContainer = document.getElementById('proxy-status-container');
+    const statusElement = document.getElementById('proxy-status');
+    
+    statusContainer.classList.remove('hidden');
+    statusElement.innerHTML = `
+        <div class="loading-spinner-sm mx-auto mb-2"></div>
+        <span class="text-sm text-indigo-300">Checking proxy status...</span>
+    `;
+    
+    // First check if we have a valid cached result
+    const cachedStatus = getProxyStatusFromCache(selectedProxy);
+    
+    if (cachedStatus) {
+        // Use cached result for detailed status
+        updateDetailedStatus(statusElement, cachedStatus);
+    } else {
+        // If no cache, check status from API
+        checkProxyStatus(selectedProxy, statusElement);
+    }
+}
+
+// Function to check proxy status in the account creation section
+function checkProxyStatus(proxy, statusElement) {
+    const startTime = performance.now();
+    const statusURL = `https://api.ndeso.xyz/proxy?ip=${proxy.ip}&port=${proxy.port}`;
+    
+    fetch(statusURL)
+        .then(response => response.json())
+        .then(data => {
+            const endTime = performance.now();
+            let latency = Math.floor((endTime - startTime) / 100);
+            let status;
+            
+            if (data.proxyip === true) {
+                status = 'active';
+                statusElement.innerHTML = `
+                    <i class="fas fa-check-circle text-emerald-400 text-xl mb-2"></i>
+                    <div class="text-sm font-medium text-emerald-400">ACTIVE</div>
+                    <div class="text-xs text-gray-400">Latency: <span class="text-amber-400">${latency}ms</span></div>
+                `;
+            } else {
+                status = 'dead';
+                statusElement.innerHTML = `
+                    <i class="fas fa-times-circle text-rose-500 text-xl mb-2"></i>
+                    <div class="text-sm font-medium text-rose-500">DEAD</div>
+                    <div class="text-xs text-gray-400">This proxy may not be working</div>
+                `;
+            }
+            
+            // Save to cache
+            saveProxyStatusToCache(proxy, status);
+        })
+        .catch(error => {
+            statusElement.innerHTML = `
+                <i class="fas fa-exclamation-triangle text-amber-400 text-xl mb-2"></i>
+                <div class="text-sm font-medium text-amber-400">STATUS UNKNOWN</div>
+                <div class="text-xs text-gray-400">Could not check proxy status</div>
+            `;
+            console.error("Fetch error:", error);
+            
+            // Save unknown status to cache
+            saveProxyStatusToCache(proxy, 'unknown');
+        });
+}
+
+// Function to update detailed status in account creation section
+function updateDetailedStatus(statusElement, status) {
+    if (status === 'active') {
+        statusElement.innerHTML = `
+            <i class="fas fa-check-circle text-emerald-400 text-xl mb-2"></i>
+            <div class="text-sm font-medium text-emerald-400">ACTIVE</div>
+            <div class="text-xs text-gray-400">Latency: <span class="text-amber-400">Cached</span></div>
+        `;
+    } else if (status === 'dead') {
+        statusElement.innerHTML = `
+            <i class="fas fa-times-circle text-rose-500 text-xl mb-2"></i>
+            <div class="text-sm font-medium text-rose-500">DEAD</div>
+            <div class="text-xs text-gray-400">This proxy may not be working</div>
+        `;
+    } else {
+        statusElement.innerHTML = `
+            <i class="fas fa-exclamation-triangle text-amber-400 text-xl mb-2"></i>
+            <div class="text-sm font-medium text-amber-400">STATUS UNKNOWN</div>
+            <div class="text-xs text-gray-400">Could not check proxy status</div>
+        `;
+    }
 }
 
 // Function to show proxy list section
