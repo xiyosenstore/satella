@@ -337,35 +337,35 @@
         filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.5));
     }
     
-    /* Status badge styles */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        font-size: 0.7rem;
-        padding: 0.15rem 0.4rem;
-        border-radius: 9999px;
-        margin-left: 0.5rem;
-        vertical-align: middle;
+    /* Status dot styles */
+    .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-left: 6px;
+        position: relative;
     }
     
-    .status-badge.loading {
-        background-color: rgba(99, 102, 241, 0.2);
-        color: #818cf8;
+    .status-dot.loading {
+        background-color: #f59e0b; /* Amber/Orange */
+        box-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+        animation: pulse 1.5s infinite ease-in-out;
     }
     
-    .status-badge.active {
-        background-color: rgba(16, 185, 129, 0.2);
-        color: #34d399;
+    .status-dot.active {
+        background-color: #10b981; /* Green */
+        box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
     }
     
-    .status-badge.dead {
-        background-color: rgba(239, 68, 68, 0.2);
-        color: #f87171;
+    .status-dot.dead {
+        background-color: #ef4444; /* Red */
+        box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
     }
     
-    .status-badge.unknown {
-        background-color: rgba(245, 158, 11, 0.2);
-        color: #fbbf24;
+    .status-dot.unknown {
+        background-color: #6b7280; /* Gray */
+        box-shadow: 0 0 4px rgba(107, 114, 128, 0.5);
     }
     
     /* Responsive adjustments */
@@ -1412,12 +1412,12 @@ function renderProxyList() {
         providerName.textContent = proxy.provider;
         providerContainer.appendChild(providerName);
         
-        // Status badge (initially loading)
-        const statusBadge = document.createElement('span');
-        statusBadge.className = 'status-badge loading ml-2';
-        statusBadge.innerHTML = '<div class="loading-spinner-xs"></div> Checking...';
-        statusBadge.id = `proxy-status-${actualIndex}`;
-        providerContainer.appendChild(statusBadge);
+        // Status dot (initially loading)
+        const statusDot = document.createElement('span');
+        statusDot.className = 'status-dot loading';
+        statusDot.setAttribute('title', 'Checking status...');
+        statusDot.id = `proxy-status-${actualIndex}`;
+        providerContainer.appendChild(statusDot);
         
         infoDiv.appendChild(providerContainer);
         
@@ -1430,9 +1430,10 @@ function renderProxyList() {
         // Right side with button
         const buttonDiv = document.createElement('div');
         const button = document.createElement('button');
-        button.className = 'create-account-btn primary-btn py-2 px-4 rounded-lg text-xs';
+        button.className = 'create-account-btn primary-btn p-2 rounded-lg text-xs';
         button.setAttribute('data-index', actualIndex);
-        button.innerHTML = 'Create Account';
+        button.setAttribute('title', 'Create Account');
+        button.innerHTML = '<i class="fas fa-plus"></i>';
         buttonDiv.appendChild(button);
         
         // Assemble the card
@@ -1443,7 +1444,7 @@ function renderProxyList() {
         proxyListContainer.appendChild(card);
         
         // Check proxy status for this card with caching
-        checkProxyStatusInList(proxy, statusBadge);
+        checkProxyStatusInList(proxy, statusDot);
     });
     
     // Add event listeners to create account buttons
@@ -1524,13 +1525,13 @@ function clearProxyStatusCache() {
 }
 
 // Function to check proxy status in the list with caching
-function checkProxyStatusInList(proxy, statusBadge) {
+function checkProxyStatusInList(proxy, statusDot) {
     // First check if we have a valid cached result
     const cachedStatus = getProxyStatusFromCache(proxy);
     
     if (cachedStatus) {
         // Use cached result
-        updateStatusBadge(statusBadge, cachedStatus);
+        updateStatusDot(statusDot, cachedStatus);
         return;
     }
     
@@ -1547,30 +1548,30 @@ function checkProxyStatusInList(proxy, statusBadge) {
                 status = 'dead';
             }
             
-            // Update the badge
-            updateStatusBadge(statusBadge, status);
+            // Update the dot
+            updateStatusDot(statusDot, status);
             
             // Save to cache
             saveProxyStatusToCache(proxy, status);
         })
         .catch(error => {
-            // Update badge to unknown
-            updateStatusBadge(statusBadge, 'unknown');
+            // Update dot to unknown
+            updateStatusDot(statusDot, 'unknown');
             console.error("Fetch error:", error);
         });
 }
 
-// Function to update status badge based on status
-function updateStatusBadge(statusBadge, status) {
+// Function to update status dot based on status
+function updateStatusDot(statusDot, status) {
     if (status === 'active') {
-        statusBadge.className = 'status-badge active';
-        statusBadge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Active';
+        statusDot.className = 'status-dot active';
+        statusDot.setAttribute('title', 'Active');
     } else if (status === 'dead') {
-        statusBadge.className = 'status-badge dead';
-        statusBadge.innerHTML = '<i class="fas fa-times-circle mr-1"></i>Dead';
+        statusDot.className = 'status-dot dead';
+        statusDot.setAttribute('title', 'Dead');
     } else {
-        statusBadge.className = 'status-badge unknown';
-        statusBadge.innerHTML = '<i class="fas fa-question-circle mr-1"></i>Unknown';
+        statusDot.className = 'status-dot unknown';
+        statusDot.setAttribute('title', 'Unknown');
     }
 }
 
