@@ -26,3 +26,6 @@ an Indonesia serverless v2ray tunnel
 3. Open `Actions` tab and enable workflows
 4. Push a commit or run the workflow manually
 5. Access `https://YOUR-WORKERS-SUBDOMAIN.workers.dev`
+
+### Credit 
+[Source](https://github.com/FoolVPN-ID/)
