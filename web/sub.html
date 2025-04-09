@@ -385,6 +385,22 @@
             font-size: 0.75rem;
         }
     }
+
+    .divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    footer a:hover i {
+        filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.5));
+        transform: translateY(-1px);
+        transition: all 0.3s ease;
+    }
+
+    footer .glass-card {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: rgba(99, 102, 241, 0.15);
+    }
 </style>
 </head>
 <body class="font-sans">
@@ -500,14 +516,12 @@
                                 <span id="selected-port" class="text-sm font-medium text-white">-</span>
                             </div>
                         </div>
-                        <div id="proxy-status-container" class="mt-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hidden">
-                            <div class="flex items-center justify-center">
-                                <div id="proxy-status" class="text-center">
-                                    <div class="loading-spinner-sm mx-auto mb-2"></div>
-                                    <span class="text-sm text-indigo-300">Checking proxy status...</span>
-                                </div>
-                            </div>
-                        </div>
+                        <div id="proxy-status-container" class="mt-3 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 hidden">
+    <div id="proxy-status" class="flex flex-col items-center justify-center">
+        <div class="loading-spinner-sm mb-3"></div>
+        <span class="text-sm font-medium text-indigo-300">Checking proxy status...</span>
+    </div>
+</div>
                     </div>
                     
                     <!-- Tabs -->
@@ -538,8 +552,7 @@
                                 <label for="vmess-uuid" class="block text-sm font-medium text-gray-300 mb-2">UUID</label>
                                 <div class="flex">
                                     <input type="text" id="vmess-uuid" name="uuid" class="flex-1 px-4 py-2.5 glass-input rounded-l-lg text-sm" value="00000000-0000-0000-0000-000000000000" required>
-                                    <button type="button" onclick="generateUUID('vmess-uuid')" class="secondary-btn px-4 py-2.5 rounded-r-lg hover:bg-slate-700">
-                                        <i class="fas fa-sync-alt"></i>
+                                
                                     </button>
                                 </div>
                             </div>
@@ -556,6 +569,19 @@
                                     <option value="none">None</option>
                                 </select>
                                 <input type="hidden" id="vmess-encryption" name="encryption" value="zero">
+                            </div>
+                            
+                            <div>
+                                <label for="vmess-custom-bug" class="block text-sm font-medium text-gray-300 mb-2">Custom Bug (Optional)</label>
+                                <input type="text" id="vmess-custom-bug" name="customBug" class="w-full px-4 py-2.5 glass-input rounded-lg text-sm" placeholder="e.g. bug.com">
+                            </div>
+
+                            <div id="vmess-wildcard-container" class="mt-3 hidden">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="vmess-wildcard" name="wildcard" class="h-4 w-4 rounded border-gray-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500 focus:ring-opacity-25">
+                                    <label for="vmess-wildcard" class="ml-2 block text-sm font-medium text-gray-300">Use Wildcard Domain</label>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">When enabled, host/SNI will be set to [bug.domain.com]</p>
                             </div>
                             
                             <div class="pt-2">
@@ -578,8 +604,6 @@
                                 <label for="vless-uuid" class="block text-sm font-medium text-gray-300 mb-2">UUID</label>
                                 <div class="flex">
                                     <input type="text" id="vless-uuid" name="uuid" class="flex-1 px-4 py-2.5 glass-input rounded-l-lg text-sm" value="00000000-0000-0000-0000-000000000000" required>
-                                    <button type="button" onclick="generateUUID('vless-uuid')" class="secondary-btn px-4 py-2.5 rounded-r-lg hover:bg-slate-700">
-                                        <i class="fas fa-sync-alt"></i>
                                     </button>
                                 </div>
                             </div>
@@ -596,6 +620,19 @@
                                     <option value="none">None</option>
                                 </select>
                                 <input type="hidden" id="vless-encryption" name="encryption" value="none">
+                            </div>
+                            
+                            <div>
+                                <label for="vless-custom-bug" class="block text-sm font-medium text-gray-300 mb-2">Custom Bug (Optional)</label>
+                                <input type="text" id="vless-custom-bug" name="customBug" class="w-full px-4 py-2.5 glass-input rounded-lg text-sm" placeholder="e.g. bug.com">
+                            </div>
+
+                            <div id="vless-wildcard-container" class="mt-3 hidden">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="vless-wildcard" name="wildcard" class="h-4 w-4 rounded border-gray-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500 focus:ring-opacity-25">
+                                    <label for="vless-wildcard" class="ml-2 block text-sm font-medium text-gray-300">Use Wildcard Domain</label>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">When enabled, host/SNI will be set to [bug.domain.com]</p>
                             </div>
                             
                             <div class="pt-2">
@@ -618,8 +655,7 @@
                                 <label for="trojan-password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
                                 <div class="flex">
                                     <input type="text" id="trojan-password" name="password" class="flex-1 px-4 py-2.5 glass-input rounded-l-lg text-sm" value="00000000-0000-0000-0000-000000000000" required>
-                                    <button type="button" onclick="generatePassword('trojan-password')" class="secondary-btn px-4 py-2.5 rounded-r-lg hover:bg-slate-700">
-                                        <i class="fas fa-sync-alt"></i>
+                                    
                                     </button>
                                 </div>
                             </div>
@@ -636,6 +672,19 @@
                                     <option value="none">None</option>
                                 </select>
                                 <input type="hidden" id="trojan-sni" name="sni" value="inconigto-mode.web.id">
+                            </div>
+                            
+                            <div>
+                                <label for="trojan-custom-bug" class="block text-sm font-medium text-gray-300 mb-2">Custom Bug (Optional)</label>
+                                <input type="text" id="trojan-custom-bug" name="customBug" class="w-full px-4 py-2.5 glass-input rounded-lg text-sm" placeholder="e.g. bug.com">
+                            </div>
+
+                            <div id="trojan-wildcard-container" class="mt-3 hidden">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="trojan-wildcard" name="wildcard" class="h-4 w-4 rounded border-gray-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500 focus:ring-opacity-25">
+                                    <label for="trojan-wildcard" class="ml-2 block text-sm font-medium text-gray-300">Use Wildcard Domain</label>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">When enabled, host/SNI will be set to [bug.domain.com]</p>
                             </div>
                             
                             <div class="pt-2">
@@ -658,8 +707,7 @@
                                 <label for="ss-password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
                                 <div class="flex">
                                     <input type="text" id="ss-password" name="password" class="flex-1 px-4 py-2.5 glass-input rounded-l-lg text-sm" value="00000000-0000-0000-0000-000000000000" required>
-                                    <button type="button" onclick="generatePassword('ss-password')" class="secondary-btn px-4 py-2.5 rounded-r-lg hover:bg-slate-700">
-                                        <i class="fas fa-sync-alt"></i>
+                                    
                                     </button>
                                 </div>
                             </div>
@@ -675,6 +723,19 @@
                                     <option value="tls">TLS</option>
                                     <option value="none">None</option>
                                 </select>
+                            </div>
+                            
+                            <div>
+                                <label for="ss-custom-bug" class="block text-sm font-medium text-gray-300 mb-2">Custom Bug (Optional)</label>
+                                <input type="text" id="ss-custom-bug" name="customBug" class="w-full px-4 py-2.5 glass-input rounded-lg text-sm" placeholder="e.g. bug.com">
+                            </div>
+
+                            <div id="ss-wildcard-container" class="mt-3 hidden">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="ss-wildcard" name="wildcard" class="h-4 w-4 rounded border-gray-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500 focus:ring-opacity-25">
+                                    <label for="ss-wildcard" class="ml-2 block text-sm font-medium text-gray-300">Use Wildcard Domain</label>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">When enabled, host/SNI will be set to [bug.domain.com]</p>
                             </div>
                             
                             <div class="pt-2">
@@ -735,9 +796,36 @@
             </div>
         </div>
     </div>
-    <div class="text-center mt-5 text-gray-500 text-xs">
-        <p>© 2023 Inconigto-Mode | Secure Connection Technology</p>
+    <footer class="mt-6 mb-4">
+    <div class="glass-card overflow-hidden">
+        <div class="p-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <div class="flex items-center mb-3 sm:mb-0">
+                    <i class="fas fa-network-wired text-lg icon-glow text-indigo-400 mr-2"></i>
+                    <span class="text-sm font-medium text-indigo-400">Inconigto-Mode</span>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-indigo-400 transition-colors">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="divider my-3"></div>
+            
+            <div class="text-center text-xs text-gray-500">
+                <p>© 2023 Inconigto-Mode | Secure Connection Technology</p>
+            </div>
+        </div>
     </div>
+</footer>
 </div>
 
 <script>
@@ -858,6 +946,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Custom Bug and Wildcard functionality
+    const customBugInputs = [
+        document.getElementById('vmess-custom-bug'),
+        document.getElementById('vless-custom-bug'),
+        document.getElementById('trojan-custom-bug'),
+        document.getElementById('ss-custom-bug')
+    ];
+
+    const wildcardContainers = [
+        document.getElementById('vmess-wildcard-container'),
+        document.getElementById('vless-wildcard-container'),
+        document.getElementById('trojan-wildcard-container'),
+        document.getElementById('ss-wildcard-container')
+    ];
+
+    // Add event listeners to show/hide wildcard option based on custom bug input
+    customBugInputs.forEach((input, index) => {
+        input.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                wildcardContainers[index].classList.remove('hidden');
+            } else {
+                wildcardContainers[index].classList.add('hidden');
+                // Uncheck wildcard when custom bug is empty
+                const wildcardCheckbox = wildcardContainers[index].querySelector('input[type="checkbox"]');
+                if (wildcardCheckbox) {
+                    wildcardCheckbox.checked = false;
+                }
+            }
+        });
+    });
+    
     // Form submissions
     const forms = [
         document.getElementById('vmess-account-form'),
@@ -882,19 +1001,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Set port based on TLS setting
                 const port = security === 'tls' ? 443 : 80;
                 
+                // Get custom bug and wildcard values
+                const customBug = formData.get('customBug') ? formData.get('customBug').trim() : '';
+                const useWildcard = customBug && formData.get('wildcard') === 'on';
+                
+                // Determine server, host and SNI values
+                const server = customBug || serverDomain;
+                const host = useWildcard ? `${customBug}.${serverDomain}` : server;
+                const sni = useWildcard ? `${customBug}.${serverDomain}` : server;
+                
                 const vmessConfig = {
                     v: '2',
                     ps: formData.get('name'),
-                    add: serverDomain,
+                    add: server,
                     port: port,
                     id: formData.get('uuid'),
                     aid: '0',
                     net: 'ws', // Always WebSocket
                     type: 'none',
-                    host: serverDomain,
+                    host: host,
                     path: formData.get('path'),
                     tls: security === 'tls' ? 'tls' : '',
-                    sni: serverDomain,
+                    sni: sni,
                     scy: 'zero'
                 };
                 
@@ -905,25 +1033,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 const security = formData.get('security');
                 const encryption = 'none';
                 const name = encodeURIComponent(formData.get('name'));
+                
+                // Get custom bug and wildcard values
+                const customBug = formData.get('customBug') ? formData.get('customBug').trim() : '';
+                const useWildcard = customBug && formData.get('wildcard') === 'on';
+                
+                // Determine server, host and SNI values
+                const server = customBug || serverDomain;
+                const host = useWildcard ? `${customBug}.${serverDomain}` : server;
+                const sni = useWildcard ? `${customBug}.${serverDomain}` : server;
+                
                 // Set port based on TLS setting
                 const port = security === 'tls' ? 443 : 80;
                 
-                connectionUrl = `vless://${uuid}@${serverDomain}:${port}?encryption=${encryption}&security=${security}&type=ws&host=${serverDomain}&path=${path}#${name}`;
+                connectionUrl = `vless://${uuid}@${server}:${port}?encryption=${encryption}&security=${security}&type=ws&host=${host}&path=${path}&sni=${sni}#${name}`;
             } else if (formType === 'trojan') {
                 const password = formData.get('password');
                 const path = encodeURIComponent(formData.get('path'));
                 const security = formData.get('security');
-                const sni = serverDomain;
                 const name = encodeURIComponent(formData.get('name'));
+                
+                // Get custom bug and wildcard values
+                const customBug = formData.get('customBug') ? formData.get('customBug').trim() : '';
+                const useWildcard = customBug && formData.get('wildcard') === 'on';
+                
+                // Determine server, host and SNI values
+                const server = customBug || serverDomain;
+                const host = useWildcard ? `${customBug}.${serverDomain}` : server;
+                const sni = useWildcard ? `${customBug}.${serverDomain}` : server;
+                
                 // Set port based on TLS setting
                 const port = security === 'tls' ? 443 : 80;
                 
-                connectionUrl = `trojan://${password}@${serverDomain}:${port}?security=${security}&type=ws&host=${serverDomain}&path=${path}&sni=${sni}#${name}`;
+                connectionUrl = `trojan://${password}@${server}:${port}?security=${security}&type=ws&host=${host}&path=${path}&sni=${sni}#${name}`;
             } else if (formType === 'ss') {
                 const password = formData.get('password');
                 const name = encodeURIComponent(formData.get('name'));
                 const path = encodeURIComponent(formData.get('path'));
                 const security = formData.get('security');
+                
+                // Get custom bug and wildcard values
+                const customBug = formData.get('customBug') ? formData.get('customBug').trim() : '';
+                const useWildcard = customBug && formData.get('wildcard') === 'on';
+                
+                // Determine server, host and SNI values
+                const server = customBug || serverDomain;
+                const host = useWildcard ? `${customBug}.${serverDomain}` : server;
+                const sni = useWildcard ? `${customBug}.${serverDomain}` : server;
                 
                 // Set port based on TLS setting
                 const port = security === 'tls' ? 443 : 80;
@@ -935,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const userInfo = btoa(`${method}:${password}`);
                 
                 // Create the new format SS URL with dynamic port
-                connectionUrl = `ss://${userInfo}@${serverDomain}:${port}?encryption=none&type=ws&host=${serverDomain}&path=${path}&security=${security}&sni=${serverDomain}#${name}`;
+                connectionUrl = `ss://${userInfo}@${server}:${port}?encryption=none&type=ws&host=${host}&path=${path}&security=${security}&sni=${sni}#${name}`;
             }
             
             // Display the result
@@ -1531,7 +1687,7 @@ function selectProxy(index, customProxy = null) {
     
     // Update form fields
     const accountName = `${selectedProxy.country} - ${selectedProxy.provider}`;
-    const path = `/${selectedProxy.ip}-${selectedProxy.port}`;
+    const path = `/Inconigto-Mode/${selectedProxy.ip}-${selectedProxy.port}`;
     
     document.getElementById('vmess-name').value = accountName;
     document.getElementById('vless-name').value = accountName;
@@ -1582,22 +1738,28 @@ function checkProxyStatus(proxy, statusElement) {
         .then(response => response.json())
         .then(data => {
             const endTime = performance.now();
-            let latency = Math.floor((endTime - startTime) / 100);
+            let latency = Math.floor(endTime - startTime);
             let status;
             
             if (data.proxyip === true) {
                 status = 'active';
                 statusElement.innerHTML = `
-                    <i class="fas fa-check-circle text-emerald-400 text-xl mb-2"></i>
-                    <div class="text-sm font-medium text-emerald-400">ACTIVE</div>
-                    <div class="text-xs text-gray-400">Latency: <span class="text-amber-400">${latency}ms</span></div>
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-check-circle text-emerald-400 text-2xl mb-2"></i>
+                        <div class="text-sm font-semibold text-emerald-400 mb-1">ACTIVE</div>
+                        <div class="px-3 py-1 rounded-full bg-emerald-400/10 text-xs text-emerald-300">
+                            Latency: <span class="font-medium">${latency}ms</span>
+                        </div>
+                    </div>
                 `;
             } else {
                 status = 'dead';
                 statusElement.innerHTML = `
-                    <i class="fas fa-times-circle text-rose-500 text-xl mb-2"></i>
-                    <div class="text-sm font-medium text-rose-500">DEAD</div>
-                    <div class="text-xs text-gray-400">This proxy may not be working</div>
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-times-circle text-rose-500 text-2xl mb-2"></i>
+                        <div class="text-sm font-semibold text-rose-500 mb-1">DEAD</div>
+                        <div class="px-3 py-1 rounded-full bg-rose-500/10 text-xs text-rose-300">This proxy may not be working</div>
+                    </div>
                 `;
             }
             
@@ -1606,9 +1768,11 @@ function checkProxyStatus(proxy, statusElement) {
         })
         .catch(error => {
             statusElement.innerHTML = `
-                <i class="fas fa-exclamation-triangle text-amber-400 text-xl mb-2"></i>
-                <div class="text-sm font-medium text-amber-400">STATUS UNKNOWN</div>
-                <div class="text-xs text-gray-400">Could not check proxy status</div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-exclamation-triangle text-amber-400 text-2xl mb-2"></i>
+                    <div class="text-sm font-semibold text-amber-400 mb-1">STATUS UNKNOWN</div>
+                    <div class="px-3 py-1 rounded-full bg-amber-400/10 text-xs text-amber-300">Could not verify proxy status</div>
+                </div>
             `;
             console.error("Fetch error:", error);
             
@@ -1621,21 +1785,27 @@ function checkProxyStatus(proxy, statusElement) {
 function updateDetailedStatus(statusElement, status) {
     if (status === 'active') {
         statusElement.innerHTML = `
-            <i class="fas fa-check-circle text-emerald-400 text-xl mb-2"></i>
-            <div class="text-sm font-medium text-emerald-400">ACTIVE</div>
-            <div class="text-xs text-gray-400">Latency: <span class="text-amber-400">Cached</span></div>
+            <div class="flex flex-col items-center">
+                <i class="fas fa-check-circle text-emerald-400 text-2xl mb-2"></i>
+                <div class="text-sm font-semibold text-emerald-400 mb-1">ACTIVE</div>
+                <div class="px-3 py-1 rounded-full bg-emerald-400/10 text-xs text-emerald-300">Ready to use</div>
+            </div>
         `;
     } else if (status === 'dead') {
         statusElement.innerHTML = `
-            <i class="fas fa-times-circle text-rose-500 text-xl mb-2"></i>
-            <div class="text-sm font-medium text-rose-500">DEAD</div>
-            <div class="text-xs text-gray-400">This proxy may not be working</div>
+            <div class="flex flex-col items-center">
+                <i class="fas fa-times-circle text-rose-500 text-2xl mb-2"></i>
+                <div class="text-sm font-semibold text-rose-500 mb-1">DEAD</div>
+                <div class="px-3 py-1 rounded-full bg-rose-500/10 text-xs text-rose-300">This proxy may not be working</div>
+            </div>
         `;
     } else {
         statusElement.innerHTML = `
-            <i class="fas fa-exclamation-triangle text-amber-400 text-xl mb-2"></i>
-            <div class="text-sm font-medium text-amber-400">STATUS UNKNOWN</div>
-            <div class="text-xs text-gray-400">Could not check proxy status</div>
+            <div class="flex flex-col items-center">
+                <i class="fas fa-exclamation-triangle text-amber-400 text-2xl mb-2"></i>
+                <div class="text-sm font-semibold text-amber-400 mb-1">STATUS UNKNOWN</div>
+                <div class="px-3 py-1 rounded-full bg-amber-400/10 text-xs text-amber-300">Could not verify proxy status</div>
+            </div>
         `;
     }
 }
